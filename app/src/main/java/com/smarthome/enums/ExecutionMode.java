@@ -25,5 +25,26 @@ public enum ExecutionMode {
     /**
      * Indicates that a User Server needs to be started.
      */
-    USER
+    ENTRANT;
+
+    public static ExecutionMode from(final int mode) {
+        switch (mode) {
+            case 0:
+                return GATEWAY;
+
+            case 1:
+                return DB;
+
+            case 2:
+                return SENSOR;
+
+            case 3:
+                return DEVICE;
+
+            case 4:
+                return ENTRANT;
+        }
+
+        return null;
+    }
 }
