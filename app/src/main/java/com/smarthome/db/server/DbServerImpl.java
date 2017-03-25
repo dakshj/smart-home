@@ -1,8 +1,8 @@
 package com.smarthome.db.server;
 
-import com.smarthome.model.DoorSensor;
-import com.smarthome.model.MotionSensor;
-import com.smarthome.model.TemperatureSensor;
+import com.smarthome.model.sensor.DoorSensor;
+import com.smarthome.model.sensor.MotionSensor;
+import com.smarthome.model.sensor.TemperatureSensor;
 
 import java.rmi.RemoteException;
 

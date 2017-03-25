@@ -25,4 +25,11 @@ public interface DeviceServer extends Remote {
         final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNo());
         return (DeviceServer) registry.lookup(NAME);
     }
+
+    /**
+     * Returns the current state of this device.
+     *
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void queryState() throws RemoteException;
 }

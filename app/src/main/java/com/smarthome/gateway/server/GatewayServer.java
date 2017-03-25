@@ -1,19 +1,14 @@
 package com.smarthome.gateway.server;
 
-import com.smarthome.device.server.DeviceServer;
-import com.smarthome.enums.DeviceType;
-import com.smarthome.enums.SensorType;
 import com.smarthome.model.Address;
-import com.smarthome.model.Device;
-import com.smarthome.model.Sensor;
-import com.smarthome.sensor.server.SensorServer;
+import com.smarthome.model.device.Device;
+import com.smarthome.model.IoT;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.UUID;
 
 public interface GatewayServer extends Remote {
 
@@ -38,53 +33,33 @@ public interface GatewayServer extends Remote {
      * <p>
      * Stores the UUID and Address of the sensor in a {@link java.util.Map}.
      *
-     * @param sensorType The type of the sensor
-     * @param address    The address of the {@link SensorServer}
-     * @return The sensor model object, which needs to be stored at the {@link SensorServer}
+     * @param ioT     The IoT which needs to be registered
+     * @param address The address of the IoT Server
+     * @return The IoT model object, which needs to be stored at an IoT Server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    Sensor register(final SensorType sensorType, final Address address) throws RemoteException;
+    IoT register(final IoT ioT, final Address address) throws RemoteException;
 
     /**
-     * Registers a device with the gateway.
-     * <p>
-     * Stores the UUID and Address of the device in a {@link java.util.Map}.
+     * Queries the current state of the IoT.
      *
-     * @param deviceType The type of the device
-     * @param address    The address of the {@link DeviceServer}
-     * @return The device model object, which needs to be stored at the {@link DeviceType}
-     * @throws RemoteException Thrown when a Java RMI Exception occurs
+     * @param ioT The identifier of that ioT
      */
-    Device register(final DeviceType deviceType, final Address address) throws RemoteException;
-
-    /**
-     * Queries the current state of either a sensor or a device.
-     *
-     * @param id The identifier of that sensor or device
-     */
-    void queryState(final UUID id);
+    void queryState(final IoT ioT);
 
     /**
      * Reports the current state of the sensor.
      *
-     * @param sensor The sensor model object, containing the current state of the sensor
+     * @param ioT The IoT model object, containing the current state of the IoT
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void reportState(final Sensor sensor) throws RemoteException;
-
-    /**
-     * Reports the current state of the device.
-     *
-     * @param device The device model object, containing the current state of the device
-     * @throws RemoteException Thrown when a Java RMI Exception occurs
-     */
-    void reportState(final Device device) throws RemoteException;
+    void reportState(final IoT ioT) throws RemoteException;
 
     /**
      * Changes the state of the device.
      *
-     * @param id    The identifier of the device whose state needs to be changed
-     * @param state The new state of the device
+     * @param device The Device whose state needs to be changed
+     * @param state  The new state of the device
      */
-    void changeDeviceState(final UUID id, final boolean state);
+    void changeDeviceState(final Device device, final boolean state);
 }

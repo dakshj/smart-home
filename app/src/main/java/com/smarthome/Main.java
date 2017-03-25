@@ -44,10 +44,10 @@ public class Main {
                     " Please refer the JavaDoc to know more on these arguments.");
         }
 
-        int portNumber;
+        int portNo;
 
         try {
-            portNumber = Integer.parseInt(args[0]);
+            portNo = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Port Number is invalid");
         }
@@ -72,11 +72,13 @@ public class Main {
                 break;
 
             case SENSOR:
-                new SensorServerImpl();
+                // TODO Pass sensor, selfAddress and gatewayAddress
+                new SensorServerImpl(null, null, null);
                 break;
 
             case DEVICE:
-                new DeviceServerImpl();
+                // TODO Pass device, selfAddress and gatewayAddress
+                new DeviceServerImpl(null, null, null);
                 break;
 
             case ENTRANT:

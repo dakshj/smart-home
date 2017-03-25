@@ -1,16 +1,17 @@
 package com.smarthome.gateway.server;
 
-import com.smarthome.enums.DeviceType;
-import com.smarthome.enums.SensorType;
 import com.smarthome.model.Address;
-import com.smarthome.model.Bulb;
-import com.smarthome.model.Device;
-import com.smarthome.model.DoorSensor;
-import com.smarthome.model.MotionSensor;
-import com.smarthome.model.Outlet;
-import com.smarthome.model.Sensor;
-import com.smarthome.model.TemperatureSensor;
+import com.smarthome.model.device.Bulb;
+import com.smarthome.model.device.Device;
+import com.smarthome.model.sensor.DoorSensor;
+import com.smarthome.model.IoT;
+import com.smarthome.model.sensor.MotionSensor;
+import com.smarthome.model.device.Outlet;
+import com.smarthome.model.sensor.Sensor;
+import com.smarthome.model.sensor.TemperatureSensor;
+import com.smarthome.sensor.server.SensorServer;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,64 +26,67 @@ public class GatewayServerImpl implements GatewayServer {
     }
 
     @Override
-    public Sensor register(final SensorType sensorType, final Address address) throws RemoteException {
+    public IoT register(final IoT ioT, final Address address) throws RemoteException {
         final UUID uuid = getRandomUUID();
         registeredIoTs.put(uuid, address);
-        Sensor sensor = null;
 
-        switch (sensorType) {
-            case TEMPERATURE:
-                sensor = new TemperatureSensor(uuid);
-                break;
+        switch (ioT.getIoTType()) {
+            case SENSOR:
+                Sensor sensor = ((Sensor) ioT);
 
-            case MOTION:
-                sensor = new MotionSensor(uuid);
-                break;
+                switch (sensor.getSensorType()) {
+                    case TEMPERATURE:
+                        sensor = new TemperatureSensor(uuid, sensor.getIoTType(), sensor.getSensorType());
+                        break;
 
-            case DOOR:
-                sensor = new DoorSensor(uuid);
-                break;
+                    case MOTION:
+                        sensor = new MotionSensor(uuid, sensor.getIoTType(), sensor.getSensorType());
+                        break;
+
+                    case DOOR:
+                        sensor = new DoorSensor(uuid, sensor.getIoTType(), sensor.getSensorType());
+                        break;
+                }
+
+                return sensor;
+
+            case DEVICE:
+                Device device = (Device) ioT;
+
+                switch (device.getDeviceType()) {
+                    case BULB:
+                        device = new Bulb(uuid, device.getIoTType(), device.getDeviceType());
+                        break;
+
+                    case OUTLET:
+                        device = new Outlet(uuid, device.getIoTType(), device.getDeviceType());
+                        break;
+                }
+
+                return device;
         }
 
-        return sensor;
+        return null;
     }
 
     @Override
-    public Device register(final DeviceType deviceType, final Address address) throws RemoteException {
-        final UUID uuid = getRandomUUID();
-        registeredIoTs.put(uuid, address);
-        Device device = null;
-
-        switch (deviceType) {
-            case BULB:
-                device = new Bulb(uuid);
-                break;
-
-            case OUTLET:
-                device = new Outlet(uuid);
-                break;
+    public void queryState(final IoT ioT) {
+        if (registeredIoTs.containsKey(ioT.getId())) {
+            try {
+                SensorServer.connect(registeredIoTs.get(ioT.getId())).queryState();
+            } catch (RemoteException | NotBoundException e) {
+                e.printStackTrace();
+            }
         }
-
-        return device;
     }
 
     @Override
-    public void queryState(final UUID id) {
-
-    }
-
-    @Override
-    public void reportState(final Sensor sensor) throws RemoteException {
+    public void reportState(final IoT ioT) throws RemoteException {
 
     }
 
     @Override
-    public void reportState(final Device device) throws RemoteException {
-
-    }
-
-    @Override
-    public void changeDeviceState(final UUID id, final boolean state) {
+    public void changeDeviceState(final Device device, final boolean state) {
 
     }
 

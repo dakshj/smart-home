@@ -25,4 +25,11 @@ public interface SensorServer extends Remote {
         final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNo());
         return (SensorServer) registry.lookup(NAME);
     }
+
+    /**
+     * Returns the current state of this sensor.
+     *
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void queryState() throws RemoteException;
 }
