@@ -1,0 +1,14 @@
+group 'com.smarthome'
+version '1.0'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
