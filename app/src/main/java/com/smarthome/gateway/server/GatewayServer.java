@@ -1,6 +1,12 @@
 package com.smarthome.gateway.server;
 
+import com.smarthome.device.server.DeviceServer;
+import com.smarthome.enums.DeviceType;
+import com.smarthome.enums.SensorType;
 import com.smarthome.model.Address;
+import com.smarthome.model.Device;
+import com.smarthome.model.Sensor;
+import com.smarthome.sensor.server.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -25,4 +31,55 @@ public interface GatewayServer extends Remote {
         final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNo());
         return (GatewayServer) registry.lookup(NAME);
     }
+
+    /**
+     * Registers a sensor with the gateway.
+     *
+     * @param sensorType The type of the sensor
+     * @param address    The address of the {@link SensorServer}
+     * @return The sensor model object, which needs to be stored at the {@link SensorServer}
+     * @throws RemoteException Thrown when a Java RMI Exception occurs
+     */
+    Sensor register(final SensorType sensorType, final Address address) throws RemoteException;
+
+    /**
+     * Registers a device with the gateway.
+     *
+     * @param deviceType The type of the device
+     * @param address    The address of the {@link DeviceServer}
+     * @return The device model object, which needs to be stored at the {@link DeviceType}
+     * @throws RemoteException Thrown when a Java RMI Exception occurs
+     */
+    Device register(final DeviceType deviceType, final Address address) throws RemoteException;
+
+    /**
+     * Queries the current state of either a sensor or a device.
+     *
+     * @param id The identifier of that sensor or device
+     */
+    void queryState(final long id);
+
+    /**
+     * Reports the current state of the sensor.
+     *
+     * @param sensor The sensor model object, containing the current state of the sensor
+     * @throws RemoteException Thrown when a Java RMI Exception occurs
+     */
+    void reportState(final Sensor sensor) throws RemoteException;
+
+    /**
+     * Reports the current state of the device.
+     *
+     * @param device The device model object, containing the current state of the device
+     * @throws RemoteException Thrown when a Java RMI Exception occurs
+     */
+    void reportState(final Device device) throws RemoteException;
+
+    /**
+     * Changes the state of the device.
+     *
+     * @param id    The identifier of the device whose state needs to be changed
+     * @param state The new state of the device
+     */
+    void changeDeviceState(final long id, final boolean state);
 }

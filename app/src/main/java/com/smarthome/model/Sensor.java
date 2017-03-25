@@ -2,7 +2,7 @@ package com.smarthome.model;
 
 import java.io.Serializable;
 
-class Sensor<T> implements Serializable {
+public class Sensor<T> implements Serializable {
 
     private final long id;
     private T data;

@@ -26,7 +26,7 @@ public class Main {
      *             <p>
      *             <i>For Entrant:</i> The type of entrant, i.e. User, Intruder
      * </p>
-     * @throws RemoteException when a Java RMI Exception occurs
+     * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
     public static void main(String[] args) throws RemoteException {
 

@@ -1,6 +1,6 @@
 package com.smarthome.model;
 
-class Device {
+public class Device {
 
     private final long id;
     private boolean status;
