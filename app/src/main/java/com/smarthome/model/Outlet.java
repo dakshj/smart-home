@@ -1,8 +1,10 @@
 package com.smarthome.model;
 
+import java.util.UUID;
+
 public class Outlet extends Device {
 
-    Outlet(final long id) {
+    public Outlet(final UUID id) {
         super(id);
     }
 }

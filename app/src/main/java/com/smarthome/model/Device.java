@@ -1,15 +1,17 @@
 package com.smarthome.model;
 
+import java.util.UUID;
+
 public class Device {
 
-    private final long id;
+    private final UUID id;
     private boolean status;
 
-    Device(final long id) {
+    Device(final UUID id) {
         this.id = id;
     }
 
-    private long getId() {
+    private UUID getId() {
         return id;
     }
 

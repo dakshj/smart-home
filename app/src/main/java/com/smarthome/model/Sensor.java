@@ -1,17 +1,18 @@
 package com.smarthome.model;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class Sensor<T> implements Serializable {
 
-    private final long id;
+    private final UUID id;
     private T data;
 
-    Sensor(final long id) {
+    Sensor(final UUID id) {
         this.id = id;
     }
 
-    private long getId() {
+    private UUID getId() {
         return id;
     }
 

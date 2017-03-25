@@ -13,6 +13,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.UUID;
 
 public interface GatewayServer extends Remote {
 
@@ -34,6 +35,8 @@ public interface GatewayServer extends Remote {
 
     /**
      * Registers a sensor with the gateway.
+     * <p>
+     * Stores the UUID and Address of the sensor in a {@link java.util.Map}.
      *
      * @param sensorType The type of the sensor
      * @param address    The address of the {@link SensorServer}
@@ -44,6 +47,8 @@ public interface GatewayServer extends Remote {
 
     /**
      * Registers a device with the gateway.
+     * <p>
+     * Stores the UUID and Address of the device in a {@link java.util.Map}.
      *
      * @param deviceType The type of the device
      * @param address    The address of the {@link DeviceServer}
@@ -57,7 +62,7 @@ public interface GatewayServer extends Remote {
      *
      * @param id The identifier of that sensor or device
      */
-    void queryState(final long id);
+    void queryState(final UUID id);
 
     /**
      * Reports the current state of the sensor.
@@ -81,5 +86,5 @@ public interface GatewayServer extends Remote {
      * @param id    The identifier of the device whose state needs to be changed
      * @param state The new state of the device
      */
-    void changeDeviceState(final long id, final boolean state);
+    void changeDeviceState(final UUID id, final boolean state);
 }

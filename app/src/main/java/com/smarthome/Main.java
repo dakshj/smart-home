@@ -1,6 +1,11 @@
 package com.smarthome;
 
+import com.smarthome.db.server.DbServerImpl;
+import com.smarthome.device.server.DeviceServerImpl;
+import com.smarthome.entrant.server.EntrantServerImpl;
 import com.smarthome.enums.ExecutionMode;
+import com.smarthome.gateway.server.GatewayServerImpl;
+import com.smarthome.sensor.server.SensorServerImpl;
 
 import java.rmi.RemoteException;
 
@@ -8,6 +13,10 @@ public class Main {
     /**
      * @param args <p>
      *             args[0]:
+     *             <p>
+     *             Port Number
+     *             <p>
+     *             args[1]:
      *             <p>
      *             Use "0" to start Gateway Server
      *             <p>
@@ -19,13 +28,13 @@ public class Main {
      *             <p>
      *             Use "4" to start User Server
      *             <p>
-     *             args[1]:
+     *             args[2]:
      *             <i>For Sensor:</i> The type of sensor, i.e. Temperature, Motion, Door
      *             <p>
      *             <i>For Device:</i> The type of smart device, i.e. Bulb, Outlet
      *             <p>
      *             <i>For Entrant:</i> The type of entrant, i.e. User, Intruder
-     * </p>
+     *             </p>
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
     public static void main(String[] args) throws RemoteException {
@@ -35,10 +44,18 @@ public class Main {
                     " Please refer the JavaDoc to know more on these arguments.");
         }
 
+        int portNumber;
+
+        try {
+            portNumber = Integer.parseInt(args[0]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Port Number is invalid");
+        }
+
         ExecutionMode executionMode;
 
         try {
-            executionMode = ExecutionMode.from(Integer.parseInt(args[0]));
+            executionMode = ExecutionMode.from(Integer.parseInt(args[1]));
         } catch (NumberFormatException ignored) {
             throw new IllegalArgumentException("Execution Mode is invalid.");
         }
@@ -47,20 +64,24 @@ public class Main {
 
         switch (executionMode) {
             case GATEWAY:
+                new GatewayServerImpl();
                 break;
 
             case DB:
+                new DbServerImpl();
                 break;
 
             case SENSOR:
+                new SensorServerImpl();
                 break;
 
             case DEVICE:
+                new DeviceServerImpl();
                 break;
 
             case ENTRANT:
+                new EntrantServerImpl();
                 break;
         }
     }
-
 }

@@ -1,8 +1,10 @@
 package com.smarthome.model;
 
+import java.util.UUID;
+
 public class Bulb extends Device {
 
-    private Bulb(final long id) {
+    public Bulb(final UUID id) {
         super(id);
     }
 }

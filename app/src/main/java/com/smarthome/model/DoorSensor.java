@@ -1,8 +1,10 @@
 package com.smarthome.model;
 
+import java.util.UUID;
+
 public class DoorSensor extends Sensor<Boolean> {
 
-    DoorSensor(final long id) {
+    public DoorSensor(final UUID id) {
         super(id);
     }
 }

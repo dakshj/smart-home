@@ -1,12 +1,13 @@
 package com.smarthome.model;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class TemperatureSensor extends Sensor<Double> implements Serializable {
 
     private Double oldData;
 
-    private TemperatureSensor(final long id) {
+    public TemperatureSensor(final UUID id) {
         super(id);
     }
 
