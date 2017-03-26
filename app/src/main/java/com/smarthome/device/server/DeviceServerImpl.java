@@ -2,7 +2,9 @@ package com.smarthome.device.server;
 
 import com.smarthome.enums.IoTType;
 import com.smarthome.gateway.server.GatewayServer;
+import com.smarthome.model.Address;
 import com.smarthome.model.Device;
+import com.smarthome.model.IoT;
 import com.smarthome.model.config.DeviceConfig;
 
 import java.rmi.NotBoundException;
@@ -10,6 +12,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
 import java.util.UUID;
 
 public class DeviceServerImpl extends UnicastRemoteObject implements DeviceServer {
@@ -18,6 +21,7 @@ public class DeviceServerImpl extends UnicastRemoteObject implements DeviceServe
     private final Device device;
 
     private long synchronizationOffset;
+    private Map<IoT, Address> registeredIoTs;
 
     public DeviceServerImpl(final DeviceConfig deviceConfig) throws RemoteException {
         this.deviceConfig = deviceConfig;
@@ -66,6 +70,11 @@ public class DeviceServerImpl extends UnicastRemoteObject implements DeviceServe
     public void toggleState() throws RemoteException {
         getDevice().setState(!getDevice().getState());
         queryState();
+    }
+
+    @Override
+    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
+        this.registeredIoTs = registeredIoTs;
     }
 
     private DeviceConfig getDeviceConfig() {

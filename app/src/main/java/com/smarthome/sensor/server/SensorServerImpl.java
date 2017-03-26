@@ -3,6 +3,8 @@ package com.smarthome.sensor.server;
 import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
 import com.smarthome.gateway.server.GatewayServer;
+import com.smarthome.model.Address;
+import com.smarthome.model.IoT;
 import com.smarthome.model.config.SensorConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.Sensor;
@@ -13,6 +15,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -24,6 +27,7 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
     private final Sensor sensor;
 
     private long synchronizationOffset;
+    private Map<IoT, Address> registeredIoTs;
 
     public SensorServerImpl(final SensorConfig sensorConfig) throws RemoteException {
         this.sensorConfig = sensorConfig;
@@ -113,6 +117,11 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
         doorSensor.setData(doorSensor.getData());
 
         queryState();
+    }
+
+    @Override
+    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
+        this.registeredIoTs = registeredIoTs;
     }
 
     private SensorConfig getSensorConfig() {

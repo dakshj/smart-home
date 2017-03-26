@@ -2,6 +2,7 @@ package com.smarthome.db.server;
 
 import com.smarthome.enums.IoTType;
 import com.smarthome.gateway.server.GatewayServer;
+import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
 import com.smarthome.model.config.DbConfig;
@@ -14,6 +15,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
 import java.util.UUID;
 
 public class DbServerImpl extends UnicastRemoteObject implements DbServer {
@@ -23,6 +25,7 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
     private final Logger logger;
 
     private long synchronizationOffset;
+    private Map<IoT, Address> registeredIoTs;
 
     public DbServerImpl(final DbConfig dbConfig) throws RemoteException {
         this.dbConfig = dbConfig;
@@ -71,6 +74,11 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
     @Override
     public void deviceToggled(final Device device, final long time) throws RemoteException {
         // TODO append to log
+    }
+
+    @Override
+    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
+        this.registeredIoTs = registeredIoTs;
     }
 
     /**

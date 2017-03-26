@@ -20,6 +20,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.UUID;
 
 public class GatewayServerImpl extends UnicastRemoteObject implements GatewayServer {
@@ -40,6 +41,65 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
         registeredIoTs.put(ioT, getGatewayConfig().getAddress());
 
         startServer(gatewayConfig.getAddress().getPortNo());
+
+        waitForUserToStartLeaderElectionAndTimeSync();
+    }
+
+    private void waitForUserToStartLeaderElectionAndTimeSync() {
+        System.out.println("Please press Enter after all IoT servers are running.\n" +
+                "Pressing Enter will being the Leader Election and Time Synchronization jobs.");
+        new Scanner(System.in).next();
+        electLeader();
+        // TODO perform time sync
+    }
+
+    /**
+     * Elects a leader using the
+     * <a href="https://en.wikipedia.org/wiki/Bully_algorithm">Bully algorithm</a>.
+     */
+    private void electLeader() {
+        broadcastRegisteredIoTs();
+    }
+
+    /**
+     * Broadcasts the {@link Map} of all registered IoTs to each IoT.
+     */
+    private void broadcastRegisteredIoTs() {
+        // Send to DB
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DB)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> {
+                    try {
+                        DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Send to all Sensors
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.SENSOR)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> {
+                    try {
+                        SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Send to all Devices
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DEVICE)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> {
+                    try {
+                        DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     /**
