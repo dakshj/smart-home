@@ -13,7 +13,7 @@ public class Sensor<T> extends IoT implements Serializable {
 
     private T data;
 
-    Sensor(final UUID id, final IoTType ioTType, final SensorType sensorType) {
+    public Sensor(final UUID id, final IoTType ioTType, final SensorType sensorType) {
         super(id, ioTType);
         this.sensorType = sensorType;
     }

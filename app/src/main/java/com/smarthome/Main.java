@@ -3,11 +3,20 @@ package com.smarthome;
 import com.smarthome.db.server.DbServerImpl;
 import com.smarthome.device.server.DeviceServerImpl;
 import com.smarthome.entrant.server.EntrantServerImpl;
+import com.smarthome.enums.DeviceType;
+import com.smarthome.enums.EntrantType;
 import com.smarthome.enums.ExecutionMode;
+import com.smarthome.enums.IoTType;
+import com.smarthome.enums.SensorType;
 import com.smarthome.gateway.server.GatewayServerImpl;
 import com.smarthome.model.Address;
+import com.smarthome.model.Device;
+import com.smarthome.model.Entrant;
+import com.smarthome.model.sensor.Sensor;
 import com.smarthome.sensor.server.SensorServerImpl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 
 public class Main {
@@ -84,7 +93,7 @@ public class Main {
      *             {@code false} otherwise
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, UnknownHostException {
 
         if (args == null || args.length == 0) {
             throw new IllegalArgumentException("No command-line arguments provided." +
@@ -109,12 +118,12 @@ public class Main {
 
         assert executionMode != null;
 
-        final Address gatewayAddress = null;
-        final Address dbAddress = null;
+        final Address selfAddress = getSelfAddress(portNo);
 
         switch (executionMode) {
             case GATEWAY:
-                new GatewayServerImpl(gatewayAddress, dbAddress);
+                final Address dbAddress = new Address(args[2], Integer.parseInt(args[3]));
+                new GatewayServerImpl(selfAddress, dbAddress);
                 break;
 
             case DB:
@@ -122,18 +131,33 @@ public class Main {
                 break;
 
             case SENSOR:
-                // TODO Pass sensor, selfAddress and gatewayAddress
-                new SensorServerImpl(null, null, gatewayAddress);
+                final SensorType sensorType = SensorType.from(Integer.parseInt(args[2]));
+                Address gatewayAddress = new Address(args[3], Integer.parseInt(args[4]));
+                final Sensor sensor = new Sensor(null, IoTType.SENSOR, sensorType);
+
+                new SensorServerImpl(sensor, selfAddress, gatewayAddress);
                 break;
 
             case DEVICE:
-                // TODO Pass device, selfAddress and gatewayAddress
-                new DeviceServerImpl(null, null, gatewayAddress);
+                final DeviceType deviceType = DeviceType.from(Integer.parseInt(args[2]));
+                gatewayAddress = new Address(args[3], Integer.parseInt(args[4]));
+                final Device device = new Device(null, IoTType.DEVICE, deviceType);
+
+                new DeviceServerImpl(device, selfAddress, gatewayAddress);
                 break;
 
             case ENTRANT:
-                new EntrantServerImpl();
+                final EntrantType entrantType = EntrantType.from(Integer.parseInt(args[2]));
+                gatewayAddress = new Address(args[3], Integer.parseInt(args[4]));
+                final Entrant entrant = new Entrant(Boolean.parseBoolean(args[5]));
+
+                new EntrantServerImpl(entrant, selfAddress, gatewayAddress);
                 break;
         }
+    }
+
+    private static Address getSelfAddress(final int portNo) throws UnknownHostException {
+        String host = InetAddress.getLocalHost().getHostAddress();
+        return new Address(host, portNo);
     }
 }
