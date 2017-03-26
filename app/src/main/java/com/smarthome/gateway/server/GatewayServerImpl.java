@@ -23,19 +23,17 @@ import java.util.UUID;
 public class GatewayServerImpl extends UnicastRemoteObject implements GatewayServer {
 
     private final Map<UUID, Address> registeredIoTs;
-    private final Address gatewayAddress;
     private final Address dbAddress;
 
     private long synchronizationOffset;
 
-    public GatewayServerImpl(final Address gatewayAddress, final Address dbAddress)
+    public GatewayServerImpl(final Address selfAddress, final Address dbAddress)
             throws RemoteException {
-        this.gatewayAddress = gatewayAddress;
         this.dbAddress = dbAddress;
 
         registeredIoTs = new HashMap<>();
 
-        startServer(gatewayAddress.getPortNo());
+        startServer(selfAddress.getPortNo());
     }
 
     /**
@@ -159,10 +157,6 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
             uuid = getRandomUUID();
         }
         return uuid;
-    }
-
-    private Address getGatewayAddress() {
-        return gatewayAddress;
     }
 
     private Address getDbAddress() {
