@@ -127,7 +127,7 @@ public class Main {
                 break;
 
             case DB:
-                new DbServerImpl();
+                new DbServerImpl(selfAddress);
                 break;
 
             case SENSOR:

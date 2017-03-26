@@ -3,8 +3,8 @@ package com.smarthome.gateway.server;
 import com.smarthome.db.server.DbServer;
 import com.smarthome.device.server.DeviceServer;
 import com.smarthome.model.Address;
-import com.smarthome.model.IoT;
 import com.smarthome.model.Device;
+import com.smarthome.model.IoT;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.Sensor;
@@ -13,11 +13,14 @@ import com.smarthome.sensor.server.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class GatewayServerImpl implements GatewayServer {
+public class GatewayServerImpl extends UnicastRemoteObject implements GatewayServer {
 
     private final Map<UUID, Address> registeredIoTs;
     private final Address gatewayAddress;
@@ -25,11 +28,27 @@ public class GatewayServerImpl implements GatewayServer {
 
     private long synchronizationOffset;
 
-    public GatewayServerImpl(final Address gatewayAddress, final Address dbAddress) {
+    public GatewayServerImpl(final Address gatewayAddress, final Address dbAddress)
+            throws RemoteException {
         this.gatewayAddress = gatewayAddress;
         this.dbAddress = dbAddress;
 
         registeredIoTs = new HashMap<>();
+
+        startServer(gatewayAddress.getPortNo());
+    }
+
+    /**
+     * Starts the Gateway Server on the provided port number.
+     * <p>
+     * Uses {@value #NAME} as the name to associate with the remote reference.
+     *
+     * @param portNo The port number to start the Gateway Server on
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    private void startServer(final int portNo) throws RemoteException {
+        final Registry registry = LocateRegistry.createRegistry(portNo);
+        registry.rebind(NAME, this);
     }
 
     @Override
@@ -77,7 +96,7 @@ public class GatewayServerImpl implements GatewayServer {
     }
 
     @Override
-    public void reportState(final IoT ioT) throws RemoteException {
+    public void reportState(final IoT ioT, final long time) throws RemoteException {
         DbServer dbServer = null;
 
         try {
@@ -94,19 +113,19 @@ public class GatewayServerImpl implements GatewayServer {
                     case TEMPERATURE:
                         final TemperatureSensor temperatureSensor = ((TemperatureSensor) sensor);
                         assert dbServer != null;
-                        dbServer.temperatureChanged(temperatureSensor, getSynchronizedTime());
+                        dbServer.temperatureChanged(temperatureSensor, time);
                         break;
 
                     case MOTION:
                         final MotionSensor motionSensor = ((MotionSensor) sensor);
                         assert dbServer != null;
-                        dbServer.motionDetected(motionSensor, getSynchronizedTime());
+                        dbServer.motionDetected(motionSensor, time);
                         break;
 
                     case DOOR:
                         final DoorSensor doorSensor = ((DoorSensor) sensor);
                         assert dbServer != null;
-                        dbServer.doorToggled(doorSensor, getSynchronizedTime());
+                        dbServer.doorToggled(doorSensor, time);
                         break;
                 }
                 break;
@@ -114,7 +133,7 @@ public class GatewayServerImpl implements GatewayServer {
             case DEVICE:
                 final Device device = ((Device) ioT);
                 assert dbServer != null;
-                dbServer.deviceToggled(device, getSynchronizedTime());
+                dbServer.deviceToggled(device, time);
 
                 break;
         }
@@ -164,5 +183,9 @@ public class GatewayServerImpl implements GatewayServer {
 
     private long getSynchronizationOffset() {
         return synchronizationOffset;
+    }
+
+    private void setSynchronizationOffset(final long synchronizationOffset) {
+        this.synchronizationOffset = synchronizationOffset;
     }
 }

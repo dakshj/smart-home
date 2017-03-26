@@ -50,10 +50,11 @@ public interface GatewayServer extends Remote {
     /**
      * Reports the current state of the sensor.
      *
-     * @param ioT The IoT model object, containing the current state of the IoT
+     * @param ioT  The IoT model object, containing the current state of the IoT
+     * @param time The synchronized System time when the IoT state was reported
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void reportState(final IoT ioT) throws RemoteException;
+    void reportState(final IoT ioT, final long time) throws RemoteException;
 
     /**
      * Changes the state of the device.
