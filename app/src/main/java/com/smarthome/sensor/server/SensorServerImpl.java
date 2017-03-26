@@ -1,14 +1,19 @@
 package com.smarthome.sensor.server;
 
+import com.smarthome.enums.SensorType;
 import com.smarthome.gateway.server.GatewayServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.sensor.Sensor;
+import com.smarthome.model.sensor.TemperatureSensor;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SensorServerImpl extends UnicastRemoteObject implements SensorServer {
 
@@ -29,6 +34,38 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
+
+        if (getSensor().getSensorType() == SensorType.TEMPERATURE) {
+            periodicallyGenerateTemperatureValues();
+        }
+    }
+
+    /**
+     * Generates a random Temperature value (in °F).
+     * <p>
+     * Next, waits for a random duration.
+     * <p>
+     * Finally, repeats the above.
+     */
+    private void periodicallyGenerateTemperatureValues() {
+        final long delayForNextValueGeneration = ThreadLocalRandom.current().nextLong(
+                TemperatureSensor.VALUE_GENERATION_GAP_MIN,
+                TemperatureSensor.VALUE_GENERATION_GAP_MAX
+        );
+
+        final double nextTemp = ThreadLocalRandom.current().nextDouble(
+                TemperatureSensor.VALUE_MIN,
+                TemperatureSensor.VALUE_MAX
+        );
+
+        ((TemperatureSensor) getSensor()).setData(nextTemp);
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                periodicallyGenerateTemperatureValues();
+            }
+        }, delayForNextValueGeneration);
     }
 
     /**
