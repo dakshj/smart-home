@@ -18,11 +18,12 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class GatewayServerImpl extends UnicastRemoteObject implements GatewayServer {
 
-    private final Map<UUID, Address> registeredIoTs;
+    private final Map<IoT, Address> registeredIoTs;
     private final Address dbAddress;
 
     private long synchronizationOffset;
@@ -52,7 +53,6 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     @Override
     public IoT register(final IoT ioT, final Address address) throws RemoteException {
         final UUID uuid = getRandomUUID();
-        registeredIoTs.put(uuid, address);
 
         switch (ioT.getIoTType()) {
             case SENSOR:
@@ -72,11 +72,18 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
                         break;
                 }
 
+                registeredIoTs.put(sensor, address);
+
                 return sensor;
 
             case DEVICE:
                 Device device = (Device) ioT;
-                return new Device(uuid, device.getIoTType(), device.getDeviceType());
+
+                device = new Device(uuid, device.getIoTType(), device.getDeviceType());
+
+                registeredIoTs.put(device, address);
+
+                return device;
         }
 
         return null;
@@ -84,9 +91,17 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
 
     @Override
     public void queryState(final IoT ioT) {
-        if (registeredIoTs.containsKey(ioT.getId())) {
+        if (registeredIoTs.containsKey(ioT)) {
             try {
-                SensorServer.connect(registeredIoTs.get(ioT.getId())).queryState();
+                switch (ioT.getIoTType()) {
+                    case SENSOR:
+                        SensorServer.connect(registeredIoTs.get(ioT)).queryState();
+                        break;
+
+                    case DEVICE:
+                        DeviceServer.connect(registeredIoTs.get(ioT)).queryState();
+                        break;
+                }
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
             }
@@ -140,10 +155,15 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     @Override
     public void changeDeviceState(final Device device, final boolean state) {
         try {
-            DeviceServer.connect(registeredIoTs.get(device.getId())).changeState(state);
+            DeviceServer.connect(registeredIoTs.get(device)).changeState(state);
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Set<IoT> getIoTs() {
+        return registeredIoTs.keySet();
     }
 
     /**
@@ -152,10 +172,15 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
      * @return The randomly generated UUID
      */
     private UUID getRandomUUID() {
-        UUID uuid = UUID.randomUUID();
-        if (registeredIoTs.containsKey(uuid)) {
-            uuid = getRandomUUID();
+        final UUID uuid = UUID.randomUUID();
+
+        if (registeredIoTs.keySet().stream()
+                .map(IoT::getId)
+                .filter(streamId -> streamId.equals(uuid))
+                .count() > 0) {
+            return getRandomUUID();
         }
+
         return uuid;
     }
 

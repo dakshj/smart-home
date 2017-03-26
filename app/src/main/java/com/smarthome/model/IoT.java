@@ -21,4 +21,19 @@ public class IoT {
     public IoTType getIoTType() {
         return ioTType;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final IoT ioT = (IoT) o;
+
+        return id != null ? id.equals(ioT.id) : ioT.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

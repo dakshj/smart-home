@@ -9,6 +9,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Set;
 
 public interface GatewayServer extends Remote {
 
@@ -63,4 +64,11 @@ public interface GatewayServer extends Remote {
      * @param state  The new state of the device
      */
     void changeDeviceState(final Device device, final boolean state);
+
+    /**
+     * Gets a {@link Set} of IoTs that an Entrant can interact with.
+     *
+     * @return The {@link Set} of IoTs
+     */
+    Set<IoT> getIoTs();
 }
