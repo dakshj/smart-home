@@ -1,25 +1,41 @@
 package com.smarthome.db.server;
 
-import com.smarthome.model.Address;
+import com.smarthome.enums.IoTType;
+import com.smarthome.gateway.server.GatewayServer;
 import com.smarthome.model.Device;
+import com.smarthome.model.IoT;
+import com.smarthome.model.config.DbConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.TemperatureSensor;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.UUID;
 
 public class DbServerImpl extends UnicastRemoteObject implements DbServer {
 
+    private final DbConfig dbConfig;
+    private final IoT ioT;
     private final Logger logger;
 
     private long synchronizationOffset;
 
-    public DbServerImpl(final Address selfAddress) throws RemoteException {
-        startServer(selfAddress.getPortNo());
+    public DbServerImpl(final DbConfig dbConfig) throws RemoteException {
+        this.dbConfig = dbConfig;
+        ioT = new IoT(UUID.randomUUID(), IoTType.DB);
         logger = new Logger();
+
+        startServer(dbConfig.getAddress().getPortNo());
+
+        try {
+            GatewayServer.connect(dbConfig.getGatewayAddress()).register(ioT, dbConfig.getAddress());
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -75,6 +91,14 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
 
     private void setSynchronizationOffset(final long synchronizationOffset) {
         this.synchronizationOffset = synchronizationOffset;
+    }
+
+    private IoT getIoT() {
+        return ioT;
+    }
+
+    private DbConfig getDbConfig() {
+        return dbConfig;
     }
 
     private Logger getLogger() {

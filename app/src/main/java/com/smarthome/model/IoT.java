@@ -9,7 +9,7 @@ public class IoT {
     private final UUID id;
     private final IoTType ioTType;
 
-    protected IoT(final UUID id, final IoTType ioTType) {
+    public IoT(final UUID id, final IoTType ioTType) {
         this.id = id;
         this.ioTType = ioTType;
     }

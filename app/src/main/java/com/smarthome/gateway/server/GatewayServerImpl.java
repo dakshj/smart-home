@@ -2,9 +2,11 @@ package com.smarthome.gateway.server;
 
 import com.smarthome.db.server.DbServer;
 import com.smarthome.device.server.DeviceServer;
+import com.smarthome.enums.IoTType;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
+import com.smarthome.model.config.GatewayConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.Sensor;
@@ -23,17 +25,21 @@ import java.util.UUID;
 public class GatewayServerImpl extends UnicastRemoteObject implements GatewayServer {
 
     private final Map<IoT, Address> registeredIoTs;
-    private final Address dbAddress;
+    private final IoT ioT;
+    private final GatewayConfig gatewayConfig;
 
     private long synchronizationOffset;
 
-    public GatewayServerImpl(final Address selfAddress, final Address dbAddress)
-            throws RemoteException {
-        this.dbAddress = dbAddress;
+    public GatewayServerImpl(final GatewayConfig gatewayConfig) throws RemoteException {
+        this.gatewayConfig = gatewayConfig;
+
+        ioT = new IoT(UUID.randomUUID(), IoTType.GATEWAY);
 
         registeredIoTs = new HashMap<>();
 
-        startServer(selfAddress.getPortNo());
+        registeredIoTs.put(ioT, getGatewayConfig().getAddress());
+
+        startServer(gatewayConfig.getAddress().getPortNo());
     }
 
     /**
@@ -50,8 +56,8 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     }
 
     @Override
-    public IoT register(final IoT ioT, final Address address) throws RemoteException {
-        final UUID uuid = getRandomUUID();
+    public void register(final IoT ioT, final Address address) throws RemoteException {
+        final UUID uuid = UUID.randomUUID();
 
         switch (ioT.getIoTType()) {
             case SENSOR:
@@ -72,8 +78,7 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
                 }
 
                 registeredIoTs.put(sensor, address);
-
-                return sensor;
+                break;
 
             case DEVICE:
                 Device device = (Device) ioT;
@@ -81,11 +86,8 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
                 device = new Device(uuid, device.getIoTType(), device.getDeviceType());
 
                 registeredIoTs.put(device, address);
-
-                return device;
+                break;
         }
-
-        return null;
     }
 
     @Override
@@ -112,7 +114,7 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
         DbServer dbServer = null;
 
         try {
-            dbServer = DbServer.connect(getDbAddress());
+            dbServer = DbServer.connect(getGatewayConfig().getDbAddress());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
@@ -165,26 +167,12 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
         return registeredIoTs;
     }
 
-    /**
-     * Generates a random UUID which is not present in {@code registeredIoTs}.
-     *
-     * @return The randomly generated UUID
-     */
-    private UUID getRandomUUID() {
-        final UUID uuid = UUID.randomUUID();
-
-        if (registeredIoTs.keySet().stream()
-                .map(IoT::getId)
-                .filter(streamId -> streamId.equals(uuid))
-                .count() > 0) {
-            return getRandomUUID();
-        }
-
-        return uuid;
+    private IoT getIoT() {
+        return ioT;
     }
 
-    private Address getDbAddress() {
-        return dbAddress;
+    private GatewayConfig getGatewayConfig() {
+        return gatewayConfig;
     }
 
     /**

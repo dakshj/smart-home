@@ -36,10 +36,9 @@ public interface GatewayServer extends Remote {
      *
      * @param ioT     The IoT which needs to be registered
      * @param address The address of the IoT Server
-     * @return The IoT model object, which needs to be stored at an IoT Server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    IoT register(final IoT ioT, final Address address) throws RemoteException;
+    void register(final IoT ioT, final Address address) throws RemoteException;
 
     /**
      * Queries the current state of the IoT.

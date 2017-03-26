@@ -1,8 +1,9 @@
 package com.smarthome.sensor.server;
 
+import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
 import com.smarthome.gateway.server.GatewayServer;
-import com.smarthome.model.Address;
+import com.smarthome.model.config.SensorConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
@@ -14,24 +15,25 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SensorServerImpl extends UnicastRemoteObject implements SensorServer {
 
-    private final Address gatewayAddress;
+    private final SensorConfig sensorConfig;
+    private final Sensor sensor;
 
-    private Sensor sensor;
     private long synchronizationOffset;
 
-    public SensorServerImpl(final Sensor sensor, final Address selfAddress,
-            final Address gatewayAddress) throws RemoteException {
-        this.sensor = sensor;
-        this.gatewayAddress = gatewayAddress;
+    public SensorServerImpl(final SensorConfig sensorConfig) throws RemoteException {
+        this.sensorConfig = sensorConfig;
+        sensor = new Sensor(UUID.randomUUID(), IoTType.SENSOR, sensorConfig.getSensorType());
 
-        startServer(selfAddress.getPortNo());
+        startServer(sensorConfig.getAddress().getPortNo());
 
         try {
-            setSensor((Sensor) GatewayServer.connect(gatewayAddress).register(sensor, selfAddress));
+            GatewayServer.connect(sensorConfig.getGatewayAddress())
+                    .register(sensor, sensorConfig.getAddress());
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
@@ -85,7 +87,8 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
     @Override
     public void queryState() throws RemoteException {
         try {
-            GatewayServer.connect(getGatewayAddress()).reportState(getSensor(), getSynchronizedTime());
+            GatewayServer.connect(getSensorConfig().getGatewayAddress())
+                    .reportState(getSensor(), getSynchronizedTime());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
@@ -112,16 +115,12 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
         queryState();
     }
 
+    private SensorConfig getSensorConfig() {
+        return sensorConfig;
+    }
+
     private Sensor getSensor() {
         return sensor;
-    }
-
-    private void setSensor(final Sensor sensor) {
-        this.sensor = sensor;
-    }
-
-    private Address getGatewayAddress() {
-        return gatewayAddress;
     }
 
     /**

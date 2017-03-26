@@ -10,5 +10,15 @@ public enum IoTType {
     /**
      * Indicates that the IoT type is a Device.
      */
-    DEVICE
+    DEVICE,
+
+    /**
+     * Indicates that the IoT type is a Gateway.
+     */
+    GATEWAY,
+
+    /**
+     * Indicates that the IoT type is a Database.
+     */
+    DB
 }

@@ -1,14 +1,16 @@
 package com.smarthome.model;
 
+import com.smarthome.enums.EntrantType;
+
 public class Entrant {
 
-    private final boolean authorized;
+    private final EntrantType entrantType;
 
-    public Entrant(final boolean authorized) {
-        this.authorized = authorized;
+    public Entrant(final EntrantType entrantType) {
+        this.entrantType = entrantType;
     }
 
-    private boolean isAuthorized() {
-        return authorized;
+    private EntrantType getEntrantType() {
+        return entrantType;
     }
 }

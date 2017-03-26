@@ -1,31 +1,33 @@
 package com.smarthome.device.server;
 
+import com.smarthome.enums.IoTType;
 import com.smarthome.gateway.server.GatewayServer;
-import com.smarthome.model.Address;
 import com.smarthome.model.Device;
+import com.smarthome.model.config.DeviceConfig;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.UUID;
 
 public class DeviceServerImpl extends UnicastRemoteObject implements DeviceServer {
 
-    private final Address gatewayAddress;
+    private final DeviceConfig deviceConfig;
+    private final Device device;
 
-    private Device device;
     private long synchronizationOffset;
 
-    public DeviceServerImpl(final Device device, final Address selfAddress,
-            final Address gatewayAddress) throws RemoteException {
-        this.device = device;
-        this.gatewayAddress = gatewayAddress;
+    public DeviceServerImpl(final DeviceConfig deviceConfig) throws RemoteException {
+        this.deviceConfig = deviceConfig;
+        device = new Device(UUID.randomUUID(), IoTType.DEVICE, deviceConfig.getDeviceType());
 
-        startServer(selfAddress.getPortNo());
+        startServer(deviceConfig.getAddress().getPortNo());
 
         try {
-            setDevice((Device) GatewayServer.connect(gatewayAddress).register(device, selfAddress));
+            GatewayServer.connect(deviceConfig.getGatewayAddress())
+                    .register(device, deviceConfig.getAddress());
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
@@ -47,7 +49,8 @@ public class DeviceServerImpl extends UnicastRemoteObject implements DeviceServe
     @Override
     public void queryState() throws RemoteException {
         try {
-            GatewayServer.connect(gatewayAddress).reportState(getDevice(), getSynchronizedTime());
+            GatewayServer.connect(getDeviceConfig().getGatewayAddress())
+                    .reportState(getDevice(), getSynchronizedTime());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
@@ -65,12 +68,12 @@ public class DeviceServerImpl extends UnicastRemoteObject implements DeviceServe
         queryState();
     }
 
-    private Device getDevice() {
-        return device;
+    private DeviceConfig getDeviceConfig() {
+        return deviceConfig;
     }
 
-    private void setDevice(final Device device) {
-        this.device = device;
+    private Device getDevice() {
+        return device;
     }
 
     /**

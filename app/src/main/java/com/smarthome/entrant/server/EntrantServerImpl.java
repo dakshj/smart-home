@@ -8,6 +8,7 @@ import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.Entrant;
 import com.smarthome.model.IoT;
+import com.smarthome.model.config.EntrantConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.Sensor;
@@ -22,17 +23,19 @@ import java.util.Map;
 
 public class EntrantServerImpl extends UnicastRemoteObject implements EntrantServer {
 
+    private final EntrantConfig entrantConfig;
     private final Entrant entrant;
+
     private long synchronizationOffset;
     private Map<IoT, Address> registeredIoTs;
 
-    public EntrantServerImpl(final Entrant entrant, final Address selfAddress,
-            final Address gatewayAddress) throws RemoteException {
-        this.entrant = entrant;
-        startServer(selfAddress.getPortNo());
+    public EntrantServerImpl(final EntrantConfig entrantConfig) throws RemoteException {
+        this.entrantConfig = entrantConfig;
+        entrant = new Entrant(entrantConfig.getEntrantType());
 
         try {
-            setRegisteredIoTs(GatewayServer.connect(gatewayAddress).getRegisteredIoTs());
+            setRegisteredIoTs(GatewayServer.connect(entrantConfig.getGatewayAddress())
+                    .getRegisteredIoTs());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
@@ -103,6 +106,10 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
     private void startServer(final int portNo) throws RemoteException {
         final Registry registry = LocateRegistry.createRegistry(portNo);
         registry.rebind(NAME, this);
+    }
+
+    private EntrantConfig getEntrantConfig() {
+        return entrantConfig;
     }
 
     private Entrant getEntrant() {
