@@ -9,7 +9,7 @@ public class Device extends IoT {
 
     private final DeviceType deviceType;
 
-    private boolean status;
+    private boolean state;
 
     public Device(final UUID id, final IoTType ioTType, final DeviceType deviceType) {
         super(id, ioTType);
@@ -20,11 +20,11 @@ public class Device extends IoT {
         return deviceType;
     }
 
-    private boolean isStatus() {
-        return status;
+    private boolean getState() {
+        return state;
     }
 
-    private void setStatus(final boolean status) {
-        this.status = status;
+    public void setState(final boolean state) {
+        this.state = state;
     }
 }

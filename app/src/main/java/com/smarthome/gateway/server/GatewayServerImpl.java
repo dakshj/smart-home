@@ -1,6 +1,7 @@
 package com.smarthome.gateway.server;
 
 import com.smarthome.db.server.DbServer;
+import com.smarthome.device.server.DeviceServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
 import com.smarthome.model.Device;
@@ -121,7 +122,11 @@ public class GatewayServerImpl implements GatewayServer {
 
     @Override
     public void changeDeviceState(final Device device, final boolean state) {
-
+        try {
+            DeviceServer.connect(registeredIoTs.get(device.getId())).changeState(state);
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

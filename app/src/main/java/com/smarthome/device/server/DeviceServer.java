@@ -32,4 +32,11 @@ public interface DeviceServer extends Remote {
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
     void queryState() throws RemoteException;
+
+    /**
+     * Changes the state of this device.
+     *
+     * @param state The state to be changed to
+     */
+    void changeState(final boolean state);
 }

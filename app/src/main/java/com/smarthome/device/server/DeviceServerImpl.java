@@ -36,6 +36,11 @@ public class DeviceServerImpl implements DeviceServer {
         }
     }
 
+    @Override
+    public void changeState(final boolean state) {
+        getDevice().setState(state);
+    }
+
     private Device getDevice() {
         return device;
     }
