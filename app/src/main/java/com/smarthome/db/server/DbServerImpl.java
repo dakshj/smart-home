@@ -13,10 +13,13 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class DbServerImpl extends UnicastRemoteObject implements DbServer {
 
+    private final Logger logger;
+
     private long synchronizationOffset;
 
     public DbServerImpl(final Address selfAddress) throws RemoteException {
         startServer(selfAddress.getPortNo());
+        logger = new Logger();
     }
 
     /**
@@ -35,23 +38,23 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
     @Override
     public void temperatureChanged(final TemperatureSensor temperatureSensor, final long time)
             throws RemoteException {
-
+        // TODO append to log
     }
 
     @Override
     public void motionDetected(final MotionSensor motionSensor, final long time)
             throws RemoteException {
-
+        // TODO append to log
     }
 
     @Override
     public void doorToggled(final DoorSensor doorSensor, final long time) throws RemoteException {
-
+        // TODO append to log
     }
 
     @Override
     public void deviceToggled(final Device device, final long time) throws RemoteException {
-
+        // TODO append to log
     }
 
     /**
@@ -72,5 +75,9 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
 
     private void setSynchronizationOffset(final long synchronizationOffset) {
         this.synchronizationOffset = synchronizationOffset;
+    }
+
+    private Logger getLogger() {
+        return logger;
     }
 }

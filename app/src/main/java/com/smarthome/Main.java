@@ -94,7 +94,6 @@ public class Main {
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
     public static void main(String[] args) throws RemoteException, UnknownHostException {
-
         if (args == null || args.length == 0) {
             throw new IllegalArgumentException("No command-line arguments provided." +
                     " Please refer the JavaDoc to know more on these arguments.");
