@@ -1,12 +1,11 @@
 package com.smarthome.gateway.server;
 
+import com.smarthome.db.server.DbServer;
 import com.smarthome.model.Address;
-import com.smarthome.model.device.Bulb;
-import com.smarthome.model.device.Device;
-import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.IoT;
+import com.smarthome.model.Device;
+import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
-import com.smarthome.model.device.Outlet;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
 import com.smarthome.sensor.server.SensorServer;
@@ -20,8 +19,15 @@ import java.util.UUID;
 public class GatewayServerImpl implements GatewayServer {
 
     private final Map<UUID, Address> registeredIoTs;
+    private final Address gatewayAddress;
+    private final Address dbAddress;
 
-    public GatewayServerImpl() {
+    private long synchronizationOffset;
+
+    public GatewayServerImpl(final Address gatewayAddress, final Address dbAddress) {
+        this.gatewayAddress = gatewayAddress;
+        this.dbAddress = dbAddress;
+
         registeredIoTs = new HashMap<>();
     }
 
@@ -52,18 +58,7 @@ public class GatewayServerImpl implements GatewayServer {
 
             case DEVICE:
                 Device device = (Device) ioT;
-
-                switch (device.getDeviceType()) {
-                    case BULB:
-                        device = new Bulb(uuid, device.getIoTType(), device.getDeviceType());
-                        break;
-
-                    case OUTLET:
-                        device = new Outlet(uuid, device.getIoTType(), device.getDeviceType());
-                        break;
-                }
-
-                return device;
+                return new Device(uuid, device.getIoTType(), device.getDeviceType());
         }
 
         return null;
@@ -82,7 +77,46 @@ public class GatewayServerImpl implements GatewayServer {
 
     @Override
     public void reportState(final IoT ioT) throws RemoteException {
+        DbServer dbServer = null;
 
+        try {
+            dbServer = DbServer.connect(getDbAddress());
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        }
+
+        switch (ioT.getIoTType()) {
+            case SENSOR:
+                final Sensor sensor = ((Sensor) ioT);
+
+                switch (sensor.getSensorType()) {
+                    case TEMPERATURE:
+                        final TemperatureSensor temperatureSensor = ((TemperatureSensor) sensor);
+                        assert dbServer != null;
+                        dbServer.temperatureChanged(temperatureSensor, getSynchronizedTime());
+                        break;
+
+                    case MOTION:
+                        final MotionSensor motionSensor = ((MotionSensor) sensor);
+                        assert dbServer != null;
+                        dbServer.motionDetected(motionSensor, getSynchronizedTime());
+                        break;
+
+                    case DOOR:
+                        final DoorSensor doorSensor = ((DoorSensor) sensor);
+                        assert dbServer != null;
+                        dbServer.doorToggled(doorSensor, getSynchronizedTime());
+                        break;
+                }
+                break;
+
+            case DEVICE:
+                final Device device = ((Device) ioT);
+                assert dbServer != null;
+                dbServer.deviceToggled(device, getSynchronizedTime());
+
+                break;
+        }
     }
 
     @Override
@@ -101,5 +135,29 @@ public class GatewayServerImpl implements GatewayServer {
             uuid = getRandomUUID();
         }
         return uuid;
+    }
+
+    private Address getGatewayAddress() {
+        return gatewayAddress;
+    }
+
+    private Address getDbAddress() {
+        return dbAddress;
+    }
+
+    /**
+     * Returns the System's current time after adjustment by adding an offset,
+     * calculated using the
+     * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>
+     * for clock synchronization.
+     *
+     * @return The offset-adjusted System time
+     */
+    private long getSynchronizedTime() {
+        return System.currentTimeMillis() + getSynchronizationOffset();
+    }
+
+    private long getSynchronizationOffset() {
+        return synchronizationOffset;
     }
 }

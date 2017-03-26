@@ -1,8 +1,7 @@
-package com.smarthome.model.device;
+package com.smarthome.model;
 
 import com.smarthome.enums.DeviceType;
 import com.smarthome.enums.IoTType;
-import com.smarthome.model.IoT;
 
 import java.util.UUID;
 

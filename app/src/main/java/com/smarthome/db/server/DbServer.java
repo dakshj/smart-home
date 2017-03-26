@@ -1,6 +1,7 @@
 package com.smarthome.db.server;
 
 import com.smarthome.model.Address;
+import com.smarthome.model.Device;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.TemperatureSensor;
@@ -56,4 +57,13 @@ public interface DbServer extends Remote {
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
     void doorToggled(final DoorSensor doorSensor, final long time) throws RemoteException;
+
+    /**
+     * Logs the current state of the device.
+     *
+     * @param device The device whose state was toggled
+     * @param time   The timestamp of when the device was toggled
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void deviceToggled(final Device device, final long time) throws RemoteException;
 }

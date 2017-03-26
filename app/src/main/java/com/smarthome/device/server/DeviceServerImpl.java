@@ -2,7 +2,7 @@ package com.smarthome.device.server;
 
 import com.smarthome.gateway.server.GatewayServer;
 import com.smarthome.model.Address;
-import com.smarthome.model.device.Device;
+import com.smarthome.model.Device;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;

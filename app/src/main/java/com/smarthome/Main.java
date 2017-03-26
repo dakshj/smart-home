@@ -5,6 +5,7 @@ import com.smarthome.device.server.DeviceServerImpl;
 import com.smarthome.entrant.server.EntrantServerImpl;
 import com.smarthome.enums.ExecutionMode;
 import com.smarthome.gateway.server.GatewayServerImpl;
+import com.smarthome.model.Address;
 import com.smarthome.sensor.server.SensorServerImpl;
 
 import java.rmi.RemoteException;
@@ -62,9 +63,12 @@ public class Main {
 
         assert executionMode != null;
 
+        final Address gatewayAddress = null;
+        final Address dbAddress = null;
+
         switch (executionMode) {
             case GATEWAY:
-                new GatewayServerImpl();
+                new GatewayServerImpl(gatewayAddress, dbAddress);
                 break;
 
             case DB:
@@ -73,12 +77,12 @@ public class Main {
 
             case SENSOR:
                 // TODO Pass sensor, selfAddress and gatewayAddress
-                new SensorServerImpl(null, null, null);
+                new SensorServerImpl(null, null, gatewayAddress);
                 break;
 
             case DEVICE:
                 // TODO Pass device, selfAddress and gatewayAddress
-                new DeviceServerImpl(null, null, null);
+                new DeviceServerImpl(null, null, gatewayAddress);
                 break;
 
             case ENTRANT:

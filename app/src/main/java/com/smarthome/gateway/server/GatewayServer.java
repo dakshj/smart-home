@@ -1,7 +1,7 @@
 package com.smarthome.gateway.server;
 
 import com.smarthome.model.Address;
-import com.smarthome.model.device.Device;
+import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
 
 import java.rmi.NotBoundException;
