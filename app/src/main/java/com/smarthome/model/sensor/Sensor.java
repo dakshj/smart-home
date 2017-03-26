@@ -22,7 +22,7 @@ public class Sensor<T> extends IoT implements Serializable {
         return sensorType;
     }
 
-    T getData() {
+    public T getData() {
         return data;
     }
 

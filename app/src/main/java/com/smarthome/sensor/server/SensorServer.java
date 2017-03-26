@@ -32,4 +32,8 @@ public interface SensorServer extends Remote {
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
     void queryState() throws RemoteException;
+
+    void triggerMotionSensor() throws RemoteException;
+
+    void toggleDoorSensor() throws RemoteException;
 }

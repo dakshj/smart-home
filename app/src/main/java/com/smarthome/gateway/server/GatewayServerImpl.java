@@ -18,7 +18,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public class GatewayServerImpl extends UnicastRemoteObject implements GatewayServer {
@@ -155,15 +154,15 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     @Override
     public void changeDeviceState(final Device device, final boolean state) {
         try {
-            DeviceServer.connect(registeredIoTs.get(device)).changeState(state);
+            DeviceServer.connect(registeredIoTs.get(device)).setState(state);
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public Set<IoT> getIoTs() {
-        return registeredIoTs.keySet();
+    public Map<IoT, Address> getRegisteredIoTs() {
+        return registeredIoTs;
     }
 
     /**

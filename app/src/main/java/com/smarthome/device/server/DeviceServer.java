@@ -34,9 +34,11 @@ public interface DeviceServer extends Remote {
     void queryState() throws RemoteException;
 
     /**
-     * Changes the state of this device.
+     * Sets the state of this device.
      *
-     * @param state The state to be changed to
+     * @param state The state this device needs to be set to
      */
-    void changeState(final boolean state);
+    void setState(final boolean state) throws RemoteException;
+
+    void toggleState() throws RemoteException;
 }

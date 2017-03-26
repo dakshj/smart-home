@@ -1,22 +1,30 @@
 package com.smarthome.entrant.server;
 
+import com.smarthome.device.server.DeviceServer;
+import com.smarthome.enums.IoTType;
+import com.smarthome.enums.SensorType;
 import com.smarthome.gateway.server.GatewayServer;
 import com.smarthome.model.Address;
+import com.smarthome.model.Device;
 import com.smarthome.model.Entrant;
 import com.smarthome.model.IoT;
+import com.smarthome.model.sensor.DoorSensor;
+import com.smarthome.model.sensor.MotionSensor;
+import com.smarthome.model.sensor.Sensor;
+import com.smarthome.sensor.server.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Set;
+import java.util.Map;
 
 public class EntrantServerImpl extends UnicastRemoteObject implements EntrantServer {
 
     private final Entrant entrant;
     private long synchronizationOffset;
-    private Set<IoT> ioTs;
+    private Map<IoT, Address> registeredIoTs;
 
     public EntrantServerImpl(final Entrant entrant, final Address selfAddress,
             final Address gatewayAddress) throws RemoteException {
@@ -24,10 +32,64 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
         startServer(selfAddress.getPortNo());
 
         try {
-            setIoTs(GatewayServer.connect(gatewayAddress).getIoTs());
+            setRegisteredIoTs(GatewayServer.connect(gatewayAddress).getRegisteredIoTs());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
+
+        triggerIoTs();
+    }
+
+    private void triggerIoTs() {
+        triggerMotionSensors();
+        toggleDoorSensors();
+        toggleDevices();
+    }
+
+    private void triggerMotionSensors() {
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                .map(ioT -> ((Sensor) ioT))
+                .filter(sensor -> sensor.getSensorType() == SensorType.MOTION)
+                .map(sensor -> ((MotionSensor) sensor))
+                .map(motionSensor -> getRegisteredIoTs().get(motionSensor))
+                .forEach(address -> {
+                    try {
+                        SensorServer.connect(address).triggerMotionSensor();
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    private void toggleDoorSensors() {
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                .map(ioT -> ((Sensor) ioT))
+                .filter(sensor -> sensor.getSensorType() == SensorType.DOOR)
+                .map(sensor -> ((DoorSensor) sensor))
+                .map(doorSensor -> getRegisteredIoTs().get(doorSensor))
+                .forEach(address -> {
+                    try {
+                        SensorServer.connect(address).toggleDoorSensor();
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    private void toggleDevices() {
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> ioT.getIoTType() == IoTType.DEVICE)
+                .map(ioT -> ((Device) ioT))
+                .map(device -> getRegisteredIoTs().get(device))
+                .forEach(address -> {
+                    try {
+                        DeviceServer.connect(address).toggleState();
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     /**
@@ -67,11 +129,11 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
         this.synchronizationOffset = synchronizationOffset;
     }
 
-    private Set<IoT> getIoTs() {
-        return ioTs;
+    private Map<IoT, Address> getRegisteredIoTs() {
+        return registeredIoTs;
     }
 
-    private void setIoTs(final Set<IoT> ioTs) {
-        this.ioTs = ioTs;
+    private void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) {
+        this.registeredIoTs = registeredIoTs;
     }
 }

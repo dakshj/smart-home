@@ -54,8 +54,15 @@ public class DeviceServerImpl extends UnicastRemoteObject implements DeviceServe
     }
 
     @Override
-    public void changeState(final boolean state) {
+    public void setState(final boolean state) throws RemoteException {
         getDevice().setState(state);
+        queryState();
+    }
+
+    @Override
+    public void toggleState() throws RemoteException {
+        getDevice().setState(!getDevice().getState());
+        queryState();
     }
 
     private Device getDevice() {

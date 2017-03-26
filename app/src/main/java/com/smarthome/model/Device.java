@@ -20,7 +20,7 @@ public class Device extends IoT {
         return deviceType;
     }
 
-    private boolean getState() {
+    public boolean getState() {
         return state;
     }
 

@@ -3,6 +3,7 @@ package com.smarthome.sensor.server;
 import com.smarthome.enums.SensorType;
 import com.smarthome.gateway.server.GatewayServer;
 import com.smarthome.model.Address;
+import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
 
@@ -84,10 +85,31 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
     @Override
     public void queryState() throws RemoteException {
         try {
-            GatewayServer.connect(gatewayAddress).reportState(getSensor(), getSynchronizedTime());
+            GatewayServer.connect(getGatewayAddress()).reportState(getSensor(), getSynchronizedTime());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void triggerMotionSensor() throws RemoteException {
+        if (getSensor().getSensorType() != SensorType.MOTION) {
+            return;
+        }
+
+        queryState();
+    }
+
+    @Override
+    public void toggleDoorSensor() throws RemoteException {
+        if (getSensor().getSensorType() != SensorType.DOOR) {
+            return;
+        }
+
+        final DoorSensor doorSensor = ((DoorSensor) getSensor());
+        doorSensor.setData(doorSensor.getData());
+
+        queryState();
     }
 
     private Sensor getSensor() {
@@ -96,6 +118,10 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
 
     private void setSensor(final Sensor sensor) {
         this.sensor = sensor;
+    }
+
+    private Address getGatewayAddress() {
+        return gatewayAddress;
     }
 
     /**
