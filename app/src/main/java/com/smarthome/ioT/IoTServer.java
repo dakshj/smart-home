@@ -2,17 +2,23 @@ package com.smarthome.ioT;
 
 import com.smarthome.enums.IoTType;
 import com.smarthome.ioT.db.DbServer;
+import com.smarthome.ioT.device.DeviceServer;
+import com.smarthome.ioT.gateway.GatewayServer;
+import com.smarthome.ioT.sensor.SensorServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public interface IoTServer {
+
+    Map<IoT, Long> offsetMap = new HashMap<>();
 
     IoT getIoT();
 
@@ -67,19 +73,99 @@ public interface IoTServer {
         return System.currentTimeMillis();
     }
 
+    /**
+     * Synchronizes the time of all IoTs in this distributed system using the
+     * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>.
+     */
     default void synchronizeTime() {
-        // TODO
-        // Request time from DB
+        buildOffsetMap();
+        // TODO average all offsets
+        // Send server-specific offset to each server
+    }
+
+    /**
+     * Builds a {@link Map} of all server times' offsets w.r.t. this server,
+     * which will be later used to get the offset of the entire distributed system
+     * and synchronize times using the
+     * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>.
+     */
+    default void buildOffsetMap() {
+        offsetMap.clear();
+
+        // Put self's offset as 0
+        offsetMap.put(getIoT(), 0L);
+
+        // Calculate offset for Gateway Server
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT -> !getIoT().equals(ioT))
-                .filter(ioT -> ioT.getIoTType() == IoTType.DB)
-                .map(ioT -> getRegisteredIoTs().get(ioT))
-                .forEach(address -> {
+                .filter(ioT -> ioT.getIoTType() == IoTType.GATEWAY)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
                     try {
-                        DbServer.connect(address).getCurrentTime();
+                        final long requestTime = getCurrentTime();
+                        final long remoteCurrentTime = GatewayServer.connect(address).getCurrentTime();
+                        final long responseTime = getCurrentTime();
+
+                        offsetMap.put(ioT, getOffset(requestTime, remoteCurrentTime, responseTime));
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
                 });
+
+        // Calculate offset for DB Server
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> !getIoT().equals(ioT))
+                .filter(ioT -> ioT.getIoTType() == IoTType.DB)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
+                    try {
+                        final long requestTime = getCurrentTime();
+                        final long remoteCurrentTime = DbServer.connect(address).getCurrentTime();
+                        final long responseTime = getCurrentTime();
+
+                        offsetMap.put(ioT, getOffset(requestTime, remoteCurrentTime, responseTime));
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Calculate offset for Sensor Servers
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> !getIoT().equals(ioT))
+                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
+                    try {
+                        final long requestTime = getCurrentTime();
+                        final long remoteCurrentTime = SensorServer.connect(address).getCurrentTime();
+                        final long responseTime = getCurrentTime();
+
+                        offsetMap.put(ioT, getOffset(requestTime, remoteCurrentTime, responseTime));
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Calculate offset for Device Servers
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> !getIoT().equals(ioT))
+                .filter(ioT -> ioT.getIoTType() == IoTType.DEVICE)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
+                    try {
+                        final long requestTime = getCurrentTime();
+                        final long remoteCurrentTime = DeviceServer.connect(address).getCurrentTime();
+                        final long responseTime = getCurrentTime();
+
+                        offsetMap.put(ioT, getOffset(requestTime, remoteCurrentTime, responseTime));
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    default long getOffset(final long requestTime, final long remoteCurrentTime,
+            final long responseTime) {
+        return requestTime - remoteCurrentTime + (responseTime - requestTime) / 2;
     }
 }
