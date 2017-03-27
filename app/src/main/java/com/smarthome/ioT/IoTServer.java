@@ -79,8 +79,11 @@ public interface IoTServer {
      */
     default void synchronizeTime() {
         buildOffsetMap();
-        // TODO average all offsets
-        // Send server-specific offset to each server
+
+        final long[] offsetTotal = {0};
+        offsetMap.values().forEach(offset -> offsetTotal[0] += offset);
+
+        sendSynchronizationOffsets(offsetTotal[0] / offsetMap.size());
     }
 
     /**
@@ -158,6 +161,82 @@ public interface IoTServer {
                         final long responseTime = getCurrentTime();
 
                         offsetMap.put(ioT, getOffset(requestTime, remoteCurrentTime, responseTime));
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    default void sendSynchronizationOffsets(final long offsetAverage) {
+        // Send synchronization offset to self
+        try {
+            setSynchronizationOffset(
+                    // TODO confirm the below formula, if this or reverse of it
+                    offsetMap.get(getIoT()) - offsetAverage
+            );
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        // Send synchronization offset to Gateway Server
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> !getIoT().equals(ioT))
+                .filter(ioT -> ioT.getIoTType() == IoTType.GATEWAY)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
+                    try {
+                        GatewayServer.connect(address).setSynchronizationOffset(
+                                // TODO confirm the below formula, if this or reverse of it
+                                offsetMap.get(ioT) - offsetAverage
+                        );
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Send synchronization offset to DB Server
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> !getIoT().equals(ioT))
+                .filter(ioT -> ioT.getIoTType() == IoTType.DB)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
+                    try {
+                        DbServer.connect(address).setSynchronizationOffset(
+                                // TODO confirm the below formula, if this or reverse of it
+                                offsetMap.get(ioT) - offsetAverage
+                        );
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Send synchronization offset to Sensor Servers
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> !getIoT().equals(ioT))
+                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
+                    try {
+                        SensorServer.connect(address).setSynchronizationOffset(
+                                // TODO confirm the below formula, if this or reverse of it
+                                offsetMap.get(ioT) - offsetAverage
+                        );
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Send synchronization offset to Device Servers
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> !getIoT().equals(ioT))
+                .filter(ioT -> ioT.getIoTType() == IoTType.DEVICE)
+                .forEach(ioT -> {
+                    final Address address = getRegisteredIoTs().get(ioT);
+                    try {
+                        DeviceServer.connect(address).setSynchronizationOffset(
+                                // TODO confirm the below formula, if this or reverse of it
+                                offsetMap.get(ioT) - offsetAverage
+                        );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
