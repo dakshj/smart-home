@@ -1,16 +1,15 @@
-package com.smarthome.sensor.server;
+package com.smarthome.ioT.sensor;
 
+import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
-import com.smarthome.model.IoT;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Map;
 
-public interface SensorServer extends Remote {
+public interface SensorServer extends IoTServer, Remote {
 
     String NAME = "Sensor Server";
 
@@ -38,12 +37,4 @@ public interface SensorServer extends Remote {
     void triggerMotionSensor() throws RemoteException;
 
     void toggleDoorSensor() throws RemoteException;
-
-    /**
-     * Sets the {@link Map} of all IoTs which have been registered to the Gateway Server.
-     *
-     * @param registeredIoTs The Map to set within this server
-     * @throws RemoteException Thrown when a Java RMI exception occurs
-     */
-    void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException;
 }

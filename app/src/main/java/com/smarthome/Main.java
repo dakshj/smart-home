@@ -1,16 +1,16 @@
 package com.smarthome;
 
-import com.smarthome.db.server.DbServerImpl;
-import com.smarthome.device.server.DeviceServerImpl;
+import com.smarthome.ioT.db.DbServerImpl;
+import com.smarthome.ioT.device.DeviceServerImpl;
 import com.smarthome.entrant.server.EntrantServerImpl;
 import com.smarthome.enums.ExecutionMode;
-import com.smarthome.gateway.server.GatewayServerImpl;
+import com.smarthome.ioT.gateway.GatewayServerImpl;
 import com.smarthome.model.config.DbConfig;
 import com.smarthome.model.config.DeviceConfig;
 import com.smarthome.model.config.EntrantConfig;
 import com.smarthome.model.config.GatewayConfig;
 import com.smarthome.model.config.SensorConfig;
-import com.smarthome.sensor.server.SensorServerImpl;
+import com.smarthome.ioT.sensor.SensorServerImpl;
 import com.smarthome.util.ConfigReader;
 
 import java.net.UnknownHostException;

@@ -1,7 +1,7 @@
-package com.smarthome.gateway.server;
+package com.smarthome.ioT.gateway;
 
-import com.smarthome.db.server.DbServer;
-import com.smarthome.device.server.DeviceServer;
+import com.smarthome.ioT.db.DbServer;
+import com.smarthome.ioT.device.DeviceServer;
 import com.smarthome.enums.IoTType;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
@@ -11,7 +11,7 @@ import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
-import com.smarthome.sensor.server.SensorServer;
+import com.smarthome.ioT.sensor.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -45,63 +45,6 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
         waitForUserToStartLeaderElectionAndTimeSync();
     }
 
-    private void waitForUserToStartLeaderElectionAndTimeSync() {
-        System.out.println("Please press Enter after all IoT servers are running.\n" +
-                "Pressing Enter will being the Leader Election and Time Synchronization jobs.");
-        new Scanner(System.in).next();
-        electLeader();
-        // TODO perform time sync
-    }
-
-    /**
-     * Elects a leader using the
-     * <a href="https://en.wikipedia.org/wiki/Bully_algorithm">Bully algorithm</a>.
-     */
-    private void electLeader() {
-        broadcastRegisteredIoTs();
-    }
-
-    /**
-     * Broadcasts the {@link Map} of all registered IoTs to each IoT.
-     */
-    private void broadcastRegisteredIoTs() {
-        // Send to DB
-        getRegisteredIoTs().keySet().stream()
-                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DB)
-                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> {
-                    try {
-                        DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-        // Send to all Sensors
-        getRegisteredIoTs().keySet().stream()
-                .filter(ioT1 -> ioT1.getIoTType() == IoTType.SENSOR)
-                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> {
-                    try {
-                        SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-        // Send to all Devices
-        getRegisteredIoTs().keySet().stream()
-                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DEVICE)
-                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> {
-                    try {
-                        DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                });
-    }
-
     /**
      * Starts the Gateway Server on the provided port number.
      * <p>
@@ -113,6 +56,31 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     private void startServer(final int portNo) throws RemoteException {
         final Registry registry = LocateRegistry.createRegistry(portNo);
         registry.rebind(NAME, this);
+    }
+
+    @Override
+    public IoT getIoT() {
+        return ioT;
+    }
+
+    @Override
+    public Map<IoT, Address> getRegisteredIoTs() {
+        return registeredIoTs;
+    }
+
+    @Override
+    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
+        // No-op
+    }
+
+    @Override
+    public void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException {
+        this.synchronizationOffset = synchronizationOffset;
+    }
+
+    @Override
+    public long getSynchronizationOffset() {
+        return synchronizationOffset;
     }
 
     @Override
@@ -214,7 +182,7 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     }
 
     @Override
-    public void changeDeviceState(final Device device, final boolean state) {
+    public void setDeviceState(final Device device, final boolean state) {
         try {
             DeviceServer.connect(registeredIoTs.get(device)).setState(state);
         } catch (RemoteException | NotBoundException e) {
@@ -222,36 +190,67 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
         }
     }
 
-    @Override
-    public Map<IoT, Address> getRegisteredIoTs() {
-        return registeredIoTs;
+    private void waitForUserToStartLeaderElectionAndTimeSync() {
+        System.out.println("Please press Enter after all IoT servers are running.\n" +
+                "Pressing Enter will being the Leader Election and Time Synchronization jobs.");
+        new Scanner(System.in).next();
+        electLeader();
     }
 
-    private IoT getIoT() {
-        return ioT;
+    /**
+     * Elects a leader using the
+     * <a href="https://en.wikipedia.org/wiki/Bully_algorithm">Bully algorithm</a>.
+     */
+    private void electLeader() {
+        if (isLeader()) {
+            synchronizeTime();
+        } else {
+            broadcastRegisteredIoTs();
+        }
+    }
+
+    /**
+     * Broadcasts the {@link Map} of all registered IoTs to each IoT.
+     */
+    private void broadcastRegisteredIoTs() {
+        // Send to DB
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DB)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> {
+                    try {
+                        DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Send to all Sensors
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.SENSOR)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> {
+                    try {
+                        SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        // Send to all Devices
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DEVICE)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> {
+                    try {
+                        DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     private GatewayConfig getGatewayConfig() {
         return gatewayConfig;
-    }
-
-    /**
-     * Returns the System's current time after adjustment by adding an offset,
-     * calculated using the
-     * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>
-     * for clock synchronization.
-     *
-     * @return The offset-adjusted System time
-     */
-    private long getSynchronizedTime() {
-        return System.currentTimeMillis() + getSynchronizationOffset();
-    }
-
-    private long getSynchronizationOffset() {
-        return synchronizationOffset;
-    }
-
-    private void setSynchronizationOffset(final long synchronizationOffset) {
-        this.synchronizationOffset = synchronizationOffset;
     }
 }

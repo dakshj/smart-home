@@ -1,7 +1,7 @@
-package com.smarthome.db.server;
+package com.smarthome.ioT.db;
 
 import com.smarthome.enums.IoTType;
-import com.smarthome.gateway.server.GatewayServer;
+import com.smarthome.ioT.gateway.GatewayServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
@@ -55,6 +55,16 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
     }
 
     @Override
+    public IoT getIoT() {
+        return ioT;
+    }
+
+    @Override
+    public Map<IoT, Address> getRegisteredIoTs() {
+        return registeredIoTs;
+    }
+
+    @Override
     public void temperatureChanged(final TemperatureSensor temperatureSensor, final long time)
             throws RemoteException {
         // TODO append to log
@@ -79,30 +89,19 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
     @Override
     public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
         this.registeredIoTs = registeredIoTs;
+        if (isLeader()) {
+            synchronizeTime();
+        }
     }
 
-    /**
-     * Returns the System's current time after adjustment by adding an offset,
-     * calculated using the
-     * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>
-     * for clock synchronization.
-     *
-     * @return The offset-adjusted System time
-     */
-    private long getSynchronizedTime() {
-        return System.currentTimeMillis() + getSynchronizationOffset();
-    }
-
-    private long getSynchronizationOffset() {
+    @Override
+    public long getSynchronizationOffset() {
         return synchronizationOffset;
     }
 
-    private void setSynchronizationOffset(final long synchronizationOffset) {
+    @Override
+    public void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException {
         this.synchronizationOffset = synchronizationOffset;
-    }
-
-    private IoT getIoT() {
-        return ioT;
     }
 
     private DbConfig getDbConfig() {

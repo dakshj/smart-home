@@ -1,5 +1,6 @@
-package com.smarthome.gateway.server;
+package com.smarthome.ioT.gateway;
 
+import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
@@ -9,9 +10,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Map;
 
-public interface GatewayServer extends Remote {
+public interface GatewayServer extends IoTServer, Remote {
 
     String NAME = "Gateway Server";
 
@@ -57,17 +57,10 @@ public interface GatewayServer extends Remote {
     void reportState(final IoT ioT, final long time) throws RemoteException;
 
     /**
-     * Changes the state of the device.
+     * Sets the state of the device.
      *
      * @param device The Device whose state needs to be changed
      * @param state  The new state of the device
      */
-    void changeDeviceState(final Device device, final boolean state);
-
-    /**
-     * Gets the {@link Map} of registered IoTs that an Entrant can interact with.
-     *
-     * @return The {@link Map} of IoTs
-     */
-    Map<IoT, Address> getRegisteredIoTs();
+    void setDeviceState(final Device device, final boolean state);
 }

@@ -1,9 +1,9 @@
 package com.smarthome.entrant.server;
 
-import com.smarthome.device.server.DeviceServer;
+import com.smarthome.ioT.device.DeviceServer;
 import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
-import com.smarthome.gateway.server.GatewayServer;
+import com.smarthome.ioT.gateway.GatewayServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.Entrant;
@@ -12,7 +12,7 @@ import com.smarthome.model.config.EntrantConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.Sensor;
-import com.smarthome.sensor.server.SensorServer;
+import com.smarthome.ioT.sensor.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;

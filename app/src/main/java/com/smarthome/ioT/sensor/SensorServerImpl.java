@@ -1,8 +1,8 @@
-package com.smarthome.sensor.server;
+package com.smarthome.ioT.sensor;
 
 import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
-import com.smarthome.gateway.server.GatewayServer;
+import com.smarthome.ioT.gateway.GatewayServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
 import com.smarthome.model.config.SensorConfig;
@@ -89,6 +89,16 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
     }
 
     @Override
+    public IoT getIoT() {
+        return getSensor();
+    }
+
+    @Override
+    public Map<IoT, Address> getRegisteredIoTs() {
+        return registeredIoTs;
+    }
+
+    @Override
     public void queryState() throws RemoteException {
         try {
             GatewayServer.connect(getSensorConfig().getGatewayAddress())
@@ -122,6 +132,19 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
     @Override
     public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
         this.registeredIoTs = registeredIoTs;
+        if (isLeader()) {
+            synchronizeTime();
+        }
+    }
+
+    @Override
+    public long getSynchronizationOffset() {
+        return synchronizationOffset;
+    }
+
+    @Override
+    public void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException {
+        this.synchronizationOffset = synchronizationOffset;
     }
 
     private SensorConfig getSensorConfig() {
@@ -130,25 +153,5 @@ public class SensorServerImpl extends UnicastRemoteObject implements SensorServe
 
     private Sensor getSensor() {
         return sensor;
-    }
-
-    /**
-     * Returns the System's current time after adjustment by adding an offset,
-     * calculated using the
-     * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>
-     * for clock synchronization.
-     *
-     * @return The offset-adjusted System time
-     */
-    private long getSynchronizedTime() {
-        return System.currentTimeMillis() + getSynchronizationOffset();
-    }
-
-    private long getSynchronizationOffset() {
-        return synchronizationOffset;
-    }
-
-    private void setSynchronizationOffset(final long synchronizationOffset) {
-        this.synchronizationOffset = synchronizationOffset;
     }
 }

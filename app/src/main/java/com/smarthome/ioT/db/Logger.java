@@ -1,4 +1,4 @@
-package com.smarthome.db.server;
+package com.smarthome.ioT.db;
 
 import com.smarthome.exception.LogFileCreationFailedException;
 

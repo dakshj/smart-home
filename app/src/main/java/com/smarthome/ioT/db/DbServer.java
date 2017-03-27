@@ -1,8 +1,8 @@
-package com.smarthome.db.server;
+package com.smarthome.ioT.db;
 
+import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
-import com.smarthome.model.IoT;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.TemperatureSensor;
@@ -12,9 +12,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Map;
 
-public interface DbServer extends Remote {
+public interface DbServer extends IoTServer, Remote {
 
     String NAME = "DB Server";
 
@@ -68,12 +67,4 @@ public interface DbServer extends Remote {
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
     void deviceToggled(final Device device, final long time) throws RemoteException;
-
-    /**
-     * Sets the {@link Map} of all IoTs which have been registered to the Gateway Server.
-     *
-     * @param registeredIoTs The Map to set within this server
-     * @throws RemoteException Thrown when a Java RMI exception occurs
-     */
-    void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException;
 }
