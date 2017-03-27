@@ -30,6 +30,7 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     private final GatewayConfig gatewayConfig;
 
     private long synchronizationOffset;
+    private long logicalTime;
 
     public GatewayServerImpl(final GatewayConfig gatewayConfig) throws RemoteException {
         this.gatewayConfig = gatewayConfig;
@@ -74,13 +75,13 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     }
 
     @Override
-    public void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException {
-        this.synchronizationOffset = synchronizationOffset;
+    public long getSynchronizationOffset() {
+        return synchronizationOffset;
     }
 
     @Override
-    public long getSynchronizationOffset() {
-        return synchronizationOffset;
+    public void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException {
+        this.synchronizationOffset = synchronizationOffset;
     }
 
     @Override
@@ -147,6 +148,8 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
             e.printStackTrace();
         }
 
+        assert dbServer != null;
+
         switch (ioT.getIoTType()) {
             case SENSOR:
                 final Sensor sensor = ((Sensor) ioT);
@@ -154,19 +157,16 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
                 switch (sensor.getSensorType()) {
                     case TEMPERATURE:
                         final TemperatureSensor temperatureSensor = ((TemperatureSensor) sensor);
-                        assert dbServer != null;
                         dbServer.temperatureChanged(temperatureSensor, time);
                         break;
 
                     case MOTION:
                         final MotionSensor motionSensor = ((MotionSensor) sensor);
-                        assert dbServer != null;
                         dbServer.motionDetected(motionSensor, time);
                         break;
 
                     case DOOR:
                         final DoorSensor doorSensor = ((DoorSensor) sensor);
-                        assert dbServer != null;
                         dbServer.doorToggled(doorSensor, time);
                         break;
                 }
@@ -174,9 +174,7 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
 
             case DEVICE:
                 final Device device = ((Device) ioT);
-                assert dbServer != null;
                 dbServer.deviceToggled(device, time);
-
                 break;
         }
     }

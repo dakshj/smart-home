@@ -65,24 +65,26 @@ public class DbServerImpl extends UnicastRemoteObject implements DbServer {
     }
 
     @Override
-    public void temperatureChanged(final TemperatureSensor temperatureSensor, final long time)
-            throws RemoteException {
+    public void temperatureChanged(final TemperatureSensor temperatureSensor,
+            final long chronologicalTime, final long logicalTime) throws RemoteException {
         // TODO append to log
     }
 
     @Override
-    public void motionDetected(final MotionSensor motionSensor, final long time)
-            throws RemoteException {
+    public void motionDetected(final MotionSensor motionSensor, final long chronologicalTime,
+            final long logicalTime) throws RemoteException {
         // TODO append to log
     }
 
     @Override
-    public void doorToggled(final DoorSensor doorSensor, final long time) throws RemoteException {
+    public void doorToggled(final DoorSensor doorSensor, final long chronologicalTime,
+            final long logicalTime) throws RemoteException {
         // TODO append to log
     }
 
     @Override
-    public void deviceToggled(final Device device, final long time) throws RemoteException {
+    public void deviceToggled(final Device device, final long chronologicalTime,
+            final long logicalTime) throws RemoteException {
         // TODO append to log
     }
 

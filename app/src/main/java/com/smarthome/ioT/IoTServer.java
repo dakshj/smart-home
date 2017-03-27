@@ -53,6 +53,12 @@ public interface IoTServer {
 
     void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException;
 
+    long getLogicalTime();
+
+    void setLogicalTime();
+
+    void incrementLogicalTime();
+
     /**
      * Checks if the current IoT has the highest UUID among all registered IoTs.
      *
