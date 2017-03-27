@@ -35,7 +35,7 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
 
         try {
             setRegisteredIoTs(GatewayServer.connect(entrantConfig.getGatewayAddress())
-                    .getRegisteredIoTs());
+                    .fetchRegisteredIoTs());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }

@@ -3,17 +3,13 @@ package com.smarthome.model.config;
 import com.smarthome.enums.DeviceType;
 import com.smarthome.model.Address;
 
-public class DeviceConfig {
+import java.io.Serializable;
 
-    private Address address;
+public class DeviceConfig extends Config implements Serializable {
 
     private Address gatewayAddress;
 
     private DeviceType deviceType;
-
-    public Address getAddress() {
-        return address;
-    }
 
     public Address getGatewayAddress() {
         return gatewayAddress;

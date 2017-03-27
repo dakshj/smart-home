@@ -1,16 +1,16 @@
 package com.smarthome;
 
-import com.smarthome.ioT.db.DbServerImpl;
-import com.smarthome.ioT.device.DeviceServerImpl;
 import com.smarthome.entrant.server.EntrantServerImpl;
 import com.smarthome.enums.ExecutionMode;
+import com.smarthome.ioT.db.DbServerImpl;
+import com.smarthome.ioT.device.DeviceServerImpl;
 import com.smarthome.ioT.gateway.GatewayServerImpl;
-import com.smarthome.model.config.DbConfig;
+import com.smarthome.ioT.sensor.SensorServerImpl;
+import com.smarthome.model.config.Config;
 import com.smarthome.model.config.DeviceConfig;
 import com.smarthome.model.config.EntrantConfig;
 import com.smarthome.model.config.GatewayConfig;
 import com.smarthome.model.config.SensorConfig;
-import com.smarthome.ioT.sensor.SensorServerImpl;
 import com.smarthome.util.ConfigReader;
 
 import java.net.UnknownHostException;
@@ -63,9 +63,9 @@ public class Main {
             break;
 
             case DB: {
-                ConfigReader<DbConfig> reader = new ConfigReader<>(DbConfig.class);
-                final DbConfig dbConfig = reader.read(configFilePath);
-                new DbServerImpl(dbConfig);
+                ConfigReader<Config> reader = new ConfigReader<>(Config.class);
+                final Config config = reader.read(configFilePath);
+                new DbServerImpl(config);
             }
             break;
 

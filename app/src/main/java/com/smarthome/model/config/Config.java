@@ -2,10 +2,11 @@ package com.smarthome.model.config;
 
 import com.smarthome.model.Address;
 
-public class DbConfig {
+import java.io.Serializable;
+
+public class Config implements Serializable {
 
     private Address address;
-
     private Address gatewayAddress;
 
     public Address getAddress() {

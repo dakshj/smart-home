@@ -10,6 +10,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Map;
 
 public interface GatewayServer extends IoTServer, Remote {
 
@@ -50,11 +51,12 @@ public interface GatewayServer extends IoTServer, Remote {
     /**
      * Reports the current state of the sensor.
      *
-     * @param ioT  The IoT model object, containing the current state of the IoT
-     * @param time The synchronized System time when the IoT state was reported
+     * @param ioT         The IoT model object, containing the current state of the IoT
+     * @param time        The synchronized System time when the IoT state was reported
+     * @param logicalTime The time of the logical clock when the IoT state was reported
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void reportState(final IoT ioT, final long time) throws RemoteException;
+    void reportState(final IoT ioT, final long time, final long logicalTime) throws RemoteException;
 
     /**
      * Sets the state of the device.
@@ -63,4 +65,6 @@ public interface GatewayServer extends IoTServer, Remote {
      * @param state  The new state of the device
      */
     void setDeviceState(final Device device, final boolean state);
+
+    Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException;
 }

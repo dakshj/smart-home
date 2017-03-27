@@ -1,5 +1,6 @@
 package com.smarthome.ioT.gateway;
 
+import com.smarthome.ioT.IoTServerImpl;
 import com.smarthome.ioT.db.DbServer;
 import com.smarthome.ioT.device.DeviceServer;
 import com.smarthome.enums.IoTType;
@@ -15,73 +16,31 @@ import com.smarthome.ioT.sensor.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 
-public class GatewayServerImpl extends UnicastRemoteObject implements GatewayServer {
-
-    private final Map<IoT, Address> registeredIoTs;
-    private final IoT ioT;
-    private final GatewayConfig gatewayConfig;
-
-    private long synchronizationOffset;
-    private long logicalTime;
+public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     public GatewayServerImpl(final GatewayConfig gatewayConfig) throws RemoteException {
-        this.gatewayConfig = gatewayConfig;
-
-        ioT = new IoT(UUID.randomUUID(), IoTType.GATEWAY);
-
-        registeredIoTs = new HashMap<>();
-
-        registeredIoTs.put(ioT, getGatewayConfig().getAddress());
-
-        startServer(gatewayConfig.getAddress().getPortNo());
+        super(gatewayConfig, false);
 
         waitForUserToStartLeaderElectionAndTimeSync();
     }
 
-    /**
-     * Starts the Gateway Server on the provided port number.
-     * <p>
-     * Uses {@value #NAME} as the name to associate with the remote reference.
-     *
-     * @param portNo The port number to start the Gateway Server on
-     * @throws RemoteException Thrown when a Java RMI exception occurs
-     */
-    private void startServer(final int portNo) throws RemoteException {
-        final Registry registry = LocateRegistry.createRegistry(portNo);
-        registry.rebind(NAME, this);
+    @Override
+    public IoT createIoT() {
+        return new IoT(UUID.randomUUID(), IoTType.GATEWAY);
     }
 
     @Override
-    public IoT getIoT() {
-        return ioT;
-    }
-
-    @Override
-    public Map<IoT, Address> getRegisteredIoTs() {
-        return registeredIoTs;
+    protected String getName() {
+        return NAME;
     }
 
     @Override
     public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
         // No-op
-    }
-
-    @Override
-    public long getSynchronizationOffset() {
-        return synchronizationOffset;
-    }
-
-    @Override
-    public void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException {
-        this.synchronizationOffset = synchronizationOffset;
     }
 
     @Override
@@ -106,7 +65,7 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
                         break;
                 }
 
-                registeredIoTs.put(sensor, address);
+                getRegisteredIoTs().put(sensor, address);
                 break;
 
             case DEVICE:
@@ -114,22 +73,22 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
 
                 device = new Device(uuid, device.getIoTType(), device.getDeviceType());
 
-                registeredIoTs.put(device, address);
+                getRegisteredIoTs().put(device, address);
                 break;
         }
     }
 
     @Override
     public void queryState(final IoT ioT) {
-        if (registeredIoTs.containsKey(ioT)) {
+        if (getRegisteredIoTs().containsKey(ioT)) {
             try {
                 switch (ioT.getIoTType()) {
                     case SENSOR:
-                        SensorServer.connect(registeredIoTs.get(ioT)).queryState();
+                        SensorServer.connect(getRegisteredIoTs().get(ioT)).queryState();
                         break;
 
                     case DEVICE:
-                        DeviceServer.connect(registeredIoTs.get(ioT)).queryState();
+                        DeviceServer.connect(getRegisteredIoTs().get(ioT)).queryState();
                         break;
                 }
             } catch (RemoteException | NotBoundException e) {
@@ -139,7 +98,8 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     }
 
     @Override
-    public void reportState(final IoT ioT, final long time) throws RemoteException {
+    public void reportState(final IoT ioT, final long time, final long logicalTime)
+            throws RemoteException {
         DbServer dbServer = null;
 
         try {
@@ -157,24 +117,24 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
                 switch (sensor.getSensorType()) {
                     case TEMPERATURE:
                         final TemperatureSensor temperatureSensor = ((TemperatureSensor) sensor);
-                        dbServer.temperatureChanged(temperatureSensor, time);
+                        dbServer.temperatureChanged(temperatureSensor, time, logicalTime);
                         break;
 
                     case MOTION:
                         final MotionSensor motionSensor = ((MotionSensor) sensor);
-                        dbServer.motionDetected(motionSensor, time);
+                        dbServer.motionDetected(motionSensor, time, logicalTime);
                         break;
 
                     case DOOR:
                         final DoorSensor doorSensor = ((DoorSensor) sensor);
-                        dbServer.doorToggled(doorSensor, time);
+                        dbServer.doorToggled(doorSensor, time, logicalTime);
                         break;
                 }
                 break;
 
             case DEVICE:
                 final Device device = ((Device) ioT);
-                dbServer.deviceToggled(device, time);
+                dbServer.deviceToggled(device, time, logicalTime);
                 break;
         }
     }
@@ -182,10 +142,15 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     @Override
     public void setDeviceState(final Device device, final boolean state) {
         try {
-            DeviceServer.connect(registeredIoTs.get(device)).setState(state);
+            DeviceServer.connect(getRegisteredIoTs().get(device)).setState(state);
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException {
+        return getRegisteredIoTs();
     }
 
     private void waitForUserToStartLeaderElectionAndTimeSync() {
@@ -249,6 +214,6 @@ public class GatewayServerImpl extends UnicastRemoteObject implements GatewaySer
     }
 
     private GatewayConfig getGatewayConfig() {
-        return gatewayConfig;
+        return ((GatewayConfig) getConfig());
     }
 }
