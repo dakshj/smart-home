@@ -2,6 +2,7 @@ package com.smarthome.ioT.sensor;
 
 import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
+import com.smarthome.model.Entrant;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -38,4 +39,12 @@ public interface SensorServer extends IoTServer, Remote {
     void triggerMotionSensor() throws RemoteException;
 
     void toggleDoorSensor() throws RemoteException;
+
+    /**
+     * Sets the authorized user who can change the states of all devices.
+     *
+     * @param authorizedUser The authorized user
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void setAuthorizedUser(final Entrant authorizedUser) throws RemoteException;
 }

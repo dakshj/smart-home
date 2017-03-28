@@ -15,7 +15,12 @@ public enum SensorType {
     /**
      * Indicates that the Sensor type is a Door Sensor.
      */
-    DOOR;
+    DOOR,
+
+    /**
+     * Indicates that the Sensor type is a Presence Sensor.
+     */
+    PRESENCE;
 
     public static SensorType from(final int mode) {
         switch (mode) {
@@ -27,6 +32,9 @@ public enum SensorType {
 
             case 2:
                 return DOOR;
+
+            case 3:
+                return PRESENCE;
         }
 
         return null;

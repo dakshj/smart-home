@@ -11,11 +11,17 @@ public class EntrantConfig extends Config implements Serializable {
 
     private EntrantType entrantType;
 
+    private boolean authorized;
+
     public Address getGatewayAddress() {
         return gatewayAddress;
     }
 
     public EntrantType getEntrantType() {
         return entrantType;
+    }
+
+    public boolean isAuthorized() {
+        return authorized;
     }
 }

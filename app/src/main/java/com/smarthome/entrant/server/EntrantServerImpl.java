@@ -11,6 +11,7 @@ import com.smarthome.model.IoT;
 import com.smarthome.model.config.EntrantConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
+import com.smarthome.model.sensor.PresenceSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.ioT.sensor.SensorServer;
 
@@ -36,11 +37,30 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
         try {
             setRegisteredIoTs(GatewayServer.connect(entrantConfig.getGatewayAddress())
                     .fetchRegisteredIoTs());
+            validateEntrant();
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
 
         triggerIoTs();
+    }
+
+    private void validateEntrant() {
+        if (entrantConfig.isAuthorized()) {
+            getRegisteredIoTs().keySet().stream()
+                    .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                    .map(ioT -> ((Sensor) ioT))
+                    .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
+                    .map(sensor -> ((PresenceSensor) sensor))
+                    .map(presenceSensor -> getRegisteredIoTs().get(presenceSensor))
+                    .forEach(address -> {
+                        try {        
+                            SensorServer.connect(address).setAuthorizedUser(entrant);
+                        } catch (RemoteException | NotBoundException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        }
     }
 
     private void triggerIoTs() {

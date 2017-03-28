@@ -4,6 +4,7 @@ import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
 import com.smarthome.ioT.IoTServerImpl;
 import com.smarthome.ioT.gateway.GatewayServer;
+import com.smarthome.model.Entrant;
 import com.smarthome.model.IoT;
 import com.smarthome.model.config.SensorConfig;
 import com.smarthome.model.sensor.DoorSensor;
@@ -18,6 +19,8 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SensorServerImpl extends IoTServerImpl implements SensorServer {
+
+    private Entrant authorizedUser;
 
     public SensorServerImpl(final SensorConfig sensorConfig) throws RemoteException {
         super(sensorConfig, true);
@@ -104,5 +107,10 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         doorSensor.setData(doorSensor.getData());
 
         queryState(getLogicalTime());
+    }
+
+    @Override
+    public void setAuthorizedUser(Entrant authorizedUser) throws RemoteException {
+        this.authorizedUser = authorizedUser;
     }
 }
