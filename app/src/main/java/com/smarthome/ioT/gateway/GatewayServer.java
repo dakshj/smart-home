@@ -70,4 +70,11 @@ public interface GatewayServer extends IoTServer, Remote {
     void setDeviceState(final Device device, final boolean state);
 
     Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException;
+
+    /**
+     * Raises an alarm to alert that an intruder has entered the house.
+     *
+     * @throws RemoteException Thrown when a Java RMI Exception occurs
+     */
+    void raiseAlarm() throws RemoteException;
 }

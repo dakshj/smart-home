@@ -1,9 +1,10 @@
 package com.smarthome.ioT.gateway;
 
+import com.smarthome.enums.IoTType;
 import com.smarthome.ioT.IoTServerImpl;
 import com.smarthome.ioT.db.DbServer;
 import com.smarthome.ioT.device.DeviceServer;
-import com.smarthome.enums.IoTType;
+import com.smarthome.ioT.sensor.SensorServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
@@ -12,7 +13,6 @@ import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
-import com.smarthome.ioT.sensor.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -163,6 +163,12 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
         incrementLogicalTime(0);
 
         return getRegisteredIoTs();
+    }
+
+    @Override
+    public void raiseAlarm() throws RemoteException {
+        // TODO Perform necessary actions which should happen after an alarm has been raised
+        System.out.println("An intruder has entered the house!!");
     }
 
     private void waitForUserToStartLeaderElectionAndTimeSync() {

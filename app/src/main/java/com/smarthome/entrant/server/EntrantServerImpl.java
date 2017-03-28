@@ -54,8 +54,8 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
                     .map(sensor -> ((PresenceSensor) sensor))
                     .map(presenceSensor -> getRegisteredIoTs().get(presenceSensor))
                     .forEach(address -> {
-                        try {        
-                            SensorServer.connect(address).setAuthorizedUser(entrant);
+                        try {
+                            SensorServer.connect(address).setAuthorizedEntrant();
                         } catch (RemoteException | NotBoundException e) {
                             e.printStackTrace();
                         }

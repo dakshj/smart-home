@@ -2,7 +2,6 @@ package com.smarthome.ioT.sensor;
 
 import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
-import com.smarthome.model.Entrant;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -36,15 +35,24 @@ public interface SensorServer extends IoTServer, Remote {
      */
     void queryState(final long senderLogicalTime) throws RemoteException;
 
-    void triggerMotionSensor() throws RemoteException;
+    void triggerMotionSensor() throws RemoteException, NotBoundException;
 
-    void toggleDoorSensor() throws RemoteException;
+    void toggleDoorSensor() throws RemoteException, NotBoundException;
 
     /**
      * Sets the authorized user who can change the states of all devices.
      *
-     * @param authorizedUser The authorized user
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void setAuthorizedUser(final Entrant authorizedUser) throws RemoteException;
+    void setAuthorizedEntrant() throws RemoteException;
+
+    /**
+     * Returns boolean value to check if authorized user or intruder is
+     * trigerring events.
+     *
+     * @return {@code isAuthorizedUser} The boolean flag which denotes whether
+     * the user is authorized or not
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    boolean isAuthorizedEntrant() throws RemoteException;
 }
