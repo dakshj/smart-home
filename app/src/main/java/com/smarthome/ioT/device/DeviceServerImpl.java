@@ -36,7 +36,9 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
     }
 
     @Override
-    public void queryState() throws RemoteException {
+    public void queryState(final long senderLogicalTime) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         try {
             GatewayServer.connect(getDeviceConfig().getGatewayAddress())
                     .reportState(getDevice(), getSynchronizedTime(), getLogicalTime());
@@ -46,14 +48,18 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
     }
 
     @Override
-    public void setState(final boolean state) throws RemoteException {
+    public void setState(final boolean state, final long senderLogicalTime) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         getDevice().setState(state);
-        queryState();
+        queryState(0);
     }
 
     @Override
-    public void toggleState() throws RemoteException {
+    public void toggleState(final long senderLogicalTime) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         getDevice().setState(!getDevice().getState());
-        queryState();
+        queryState(0);
     }
 }

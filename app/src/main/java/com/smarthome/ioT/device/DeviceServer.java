@@ -30,16 +30,25 @@ public interface DeviceServer extends IoTServer, Remote {
     /**
      * Returns the current state of this device.
      *
+     * @param senderLogicalTime The logical time of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void queryState() throws RemoteException;
+    void queryState(final long senderLogicalTime) throws RemoteException;
 
     /**
      * Sets the state of this device.
      *
-     * @param state The state this device needs to be set to
+     * @param state             The state this device needs to be set to
+     * @param senderLogicalTime The logical time of the calling IoT server
+     * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void setState(final boolean state) throws RemoteException;
+    void setState(final boolean state, final long senderLogicalTime) throws RemoteException;
 
-    void toggleState() throws RemoteException;
+    /**
+     * Toggles the state of the IoT Device
+     *
+     * @param senderLogicalTime The logical time of the calling IoT server
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void toggleState(final long senderLogicalTime) throws RemoteException;
 }

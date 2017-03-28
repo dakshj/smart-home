@@ -39,12 +39,16 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     @Override
-    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
+    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs,
+            final long senderLogicalTime) throws RemoteException {
         // No-op
     }
 
     @Override
-    public void register(final IoT ioT, final Address address) throws RemoteException {
+    public void register(final IoT ioT, final Address address, final long senderLogicalTime)
+            throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         final UUID uuid = UUID.randomUUID();
 
         switch (ioT.getIoTType()) {
@@ -80,15 +84,17 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     @Override
     public void queryState(final IoT ioT) {
+        incrementLogicalTime(0);
+
         if (getRegisteredIoTs().containsKey(ioT)) {
             try {
                 switch (ioT.getIoTType()) {
                     case SENSOR:
-                        SensorServer.connect(getRegisteredIoTs().get(ioT)).queryState();
+                        SensorServer.connect(getRegisteredIoTs().get(ioT)).queryState(getLogicalTime());
                         break;
 
                     case DEVICE:
-                        DeviceServer.connect(getRegisteredIoTs().get(ioT)).queryState();
+                        DeviceServer.connect(getRegisteredIoTs().get(ioT)).queryState(getLogicalTime());
                         break;
                 }
             } catch (RemoteException | NotBoundException e) {
@@ -98,8 +104,10 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     @Override
-    public void reportState(final IoT ioT, final long time, final long logicalTime)
+    public void reportState(final IoT ioT, final long time, final long senderLogicalTime)
             throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         DbServer dbServer = null;
 
         try {
@@ -117,32 +125,34 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
                 switch (sensor.getSensorType()) {
                     case TEMPERATURE:
                         final TemperatureSensor temperatureSensor = ((TemperatureSensor) sensor);
-                        dbServer.temperatureChanged(temperatureSensor, time, logicalTime);
+                        dbServer.temperatureChanged(temperatureSensor, time, senderLogicalTime);
                         break;
 
                     case MOTION:
                         final MotionSensor motionSensor = ((MotionSensor) sensor);
-                        dbServer.motionDetected(motionSensor, time, logicalTime);
+                        dbServer.motionDetected(motionSensor, time, senderLogicalTime);
                         break;
 
                     case DOOR:
                         final DoorSensor doorSensor = ((DoorSensor) sensor);
-                        dbServer.doorToggled(doorSensor, time, logicalTime);
+                        dbServer.doorToggled(doorSensor, time, senderLogicalTime);
                         break;
                 }
                 break;
 
             case DEVICE:
                 final Device device = ((Device) ioT);
-                dbServer.deviceToggled(device, time, logicalTime);
+                dbServer.deviceToggled(device, time, senderLogicalTime);
                 break;
         }
     }
 
     @Override
     public void setDeviceState(final Device device, final boolean state) {
+        incrementLogicalTime(0);
+
         try {
-            DeviceServer.connect(getRegisteredIoTs().get(device)).setState(state);
+            DeviceServer.connect(getRegisteredIoTs().get(device)).setState(state, getLogicalTime());
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
@@ -150,6 +160,8 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     @Override
     public Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException {
+        incrementLogicalTime(0);
+
         return getRegisteredIoTs();
     }
 
@@ -176,13 +188,16 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
      * Broadcasts the {@link Map} of all registered IoTs to each IoT.
      */
     private void broadcastRegisteredIoTs() {
+        incrementLogicalTime(0);
+
         // Send to DB
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT1 -> ioT1.getIoTType() == IoTType.DB)
                 .map(ioT1 -> getRegisteredIoTs().get(ioT1))
                 .forEach(address -> {
                     try {
-                        DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                        DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
+                                getLogicalTime());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
@@ -194,7 +209,8 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
                 .map(ioT1 -> getRegisteredIoTs().get(ioT1))
                 .forEach(address -> {
                     try {
-                        SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                        SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
+                                getLogicalTime());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
@@ -206,7 +222,8 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
                 .map(ioT1 -> getRegisteredIoTs().get(ioT1))
                 .forEach(address -> {
                     try {
-                        DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs());
+                        DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
+                                getLogicalTime());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }

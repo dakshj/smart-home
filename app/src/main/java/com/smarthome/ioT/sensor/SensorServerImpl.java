@@ -74,7 +74,9 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
     }
 
     @Override
-    public void queryState() throws RemoteException {
+    public void queryState(final long senderLogicalTime) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         try {
             GatewayServer.connect(getSensorConfig().getGatewayAddress())
                     .reportState(getSensor(), getSynchronizedTime(), getLogicalTime());
@@ -89,7 +91,7 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
             return;
         }
 
-        queryState();
+        queryState(getLogicalTime());
     }
 
     @Override
@@ -101,6 +103,6 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         final DoorSensor doorSensor = ((DoorSensor) getSensor());
         doorSensor.setData(doorSensor.getData());
 
-        queryState();
+        queryState(getLogicalTime());
     }
 }

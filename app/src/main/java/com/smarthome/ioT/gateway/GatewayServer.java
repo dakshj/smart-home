@@ -35,11 +35,13 @@ public interface GatewayServer extends IoTServer, Remote {
      * <p>
      * Stores the UUID and Address of the sensor in a {@link java.util.Map}.
      *
-     * @param ioT     The IoT which needs to be registered
-     * @param address The address of the IoT Server
+     * @param ioT               The IoT which needs to be registered
+     * @param address           The address of the IoT Server
+     * @param senderLogicalTime The logical time of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void register(final IoT ioT, final Address address) throws RemoteException;
+    void register(final IoT ioT, final Address address, final long senderLogicalTime)
+            throws RemoteException;
 
     /**
      * Queries the current state of the IoT.
@@ -51,12 +53,13 @@ public interface GatewayServer extends IoTServer, Remote {
     /**
      * Reports the current state of the sensor.
      *
-     * @param ioT         The IoT model object, containing the current state of the IoT
-     * @param time        The synchronized System time when the IoT state was reported
-     * @param logicalTime The time of the logical clock when the IoT state was reported
+     * @param ioT               The IoT model object, containing the current state of the IoT
+     * @param time              The synchronized System time when the IoT state was reported
+     * @param senderLogicalTime The logical time of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void reportState(final IoT ioT, final long time, final long logicalTime) throws RemoteException;
+    void reportState(final IoT ioT, final long time, final long senderLogicalTime)
+            throws RemoteException;
 
     /**
      * Sets the state of the device.

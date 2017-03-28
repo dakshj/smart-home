@@ -41,7 +41,8 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
 
         if (registerToGateway) {
             try {
-                GatewayServer.connect(config.getGatewayAddress()).register(ioT, config.getAddress());
+                GatewayServer.connect(config.getGatewayAddress()).register(ioT, config.getAddress(),
+                        getLogicalTime());
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
             }
@@ -89,7 +90,11 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
         this.logicalTime = logicalTime;
     }
 
-    private void incrementLogicalTime() {
+    protected void incrementLogicalTime(final long senderLogicalTime) {
+        if (getLogicalTime() < senderLogicalTime) {
+            setLogicalTime(senderLogicalTime);
+        }
+
         setLogicalTime(getLogicalTime() + 1);
     }
 
@@ -107,7 +112,10 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
     }
 
     @Override
-    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException {
+    public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs,
+            final long senderLogicalTime) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         this.registeredIoTs = registeredIoTs;
         if (isLeader()) {
             synchronizeTime();

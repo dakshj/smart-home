@@ -88,7 +88,7 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
                 .map(device -> getRegisteredIoTs().get(device))
                 .forEach(address -> {
                     try {
-                        DeviceServer.connect(address).toggleState();
+                        DeviceServer.connect(address).toggleState(0);
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }

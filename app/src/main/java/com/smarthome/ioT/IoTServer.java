@@ -11,10 +11,12 @@ public interface IoTServer {
     /**
      * Sets the {@link Map} of all IoTs which have been registered to the Gateway Server.
      *
-     * @param registeredIoTs The Map to set within this server
+     * @param registeredIoTs    The Map to set within this server
+     * @param senderLogicalTime The logical time of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs) throws RemoteException;
+    void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs, final long senderLogicalTime)
+            throws RemoteException;
 
     void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException;
 

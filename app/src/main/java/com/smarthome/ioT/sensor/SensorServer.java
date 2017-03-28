@@ -30,9 +30,10 @@ public interface SensorServer extends IoTServer, Remote {
     /**
      * Returns the current state of this sensor.
      *
+     * @param senderLogicalTime The logical time of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void queryState() throws RemoteException;
+    void queryState(final long senderLogicalTime) throws RemoteException;
 
     void triggerMotionSensor() throws RemoteException;
 
