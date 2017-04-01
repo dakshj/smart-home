@@ -7,5 +7,6 @@
     "host": "localhost",
     "portNo": 1100
   },
+  "randomTimeOffset": -10000,
   "sensorType": 2
 }

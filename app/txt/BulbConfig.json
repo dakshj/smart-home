@@ -7,5 +7,6 @@
     "host": "localhost",
     "portNo": 1100
   },
+  "randomTimeOffset": 5000,
   "deviceType": 0
 }

@@ -8,6 +8,7 @@ public class Config implements Serializable {
 
     private Address address;
     private Address gatewayAddress;
+    private long randomTimeOffset;
 
     public Address getAddress() {
         return address;
@@ -15,5 +16,9 @@ public class Config implements Serializable {
 
     public Address getGatewayAddress() {
         return gatewayAddress;
+    }
+
+    public long getRandomTimeOffset() {
+        return randomTimeOffset;
     }
 }

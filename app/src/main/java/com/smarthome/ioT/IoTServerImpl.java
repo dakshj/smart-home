@@ -64,7 +64,8 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
 
     protected abstract String getName();
 
-    protected Config getConfig() {
+    @Override
+    public Config getConfig() {
         return config;
     }
 
