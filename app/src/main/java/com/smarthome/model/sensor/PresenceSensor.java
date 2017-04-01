@@ -3,9 +3,10 @@ package com.smarthome.model.sensor;
 import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class PresenceSensor extends Sensor<Void> {
+public class PresenceSensor extends Sensor<Void> implements Serializable {
 
     private boolean activated;
 

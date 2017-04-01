@@ -2,7 +2,9 @@ package com.smarthome.model;
 
 import com.smarthome.enums.EntrantType;
 
-public class Entrant {
+import java.io.Serializable;
+
+public class Entrant implements Serializable {
 
     private final EntrantType entrantType;
 

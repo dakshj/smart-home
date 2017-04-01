@@ -3,9 +3,10 @@ package com.smarthome.model;
 import com.smarthome.enums.DeviceType;
 import com.smarthome.enums.IoTType;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Device extends IoT {
+public class Device extends IoT implements Serializable {
 
     private final DeviceType deviceType;
 

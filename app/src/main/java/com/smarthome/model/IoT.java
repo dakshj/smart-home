@@ -2,9 +2,10 @@ package com.smarthome.model;
 
 import com.smarthome.enums.IoTType;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class IoT {
+public class IoT implements Serializable {
 
     private final UUID id;
     private final IoTType ioTType;

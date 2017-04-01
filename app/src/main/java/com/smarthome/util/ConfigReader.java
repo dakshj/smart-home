@@ -10,13 +10,14 @@ import com.smarthome.enums.SensorType;
 import com.smarthome.gson.DeviceTypeDeserializer;
 import com.smarthome.gson.EntrantTypeDeserializer;
 import com.smarthome.gson.SensorTypeDeserializer;
+import com.smarthome.model.config.Config;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ConfigReader<T> {
+public class ConfigReader<T extends Config> {
 
     private final Class<T> clazz;
     private Gson gson;
