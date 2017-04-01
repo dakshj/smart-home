@@ -35,24 +35,34 @@ public interface SensorServer extends IoTServer, Remote {
      */
     void queryState(final long senderLogicalTime) throws RemoteException;
 
+    /**
+     * Triggers the Motion Sensor, and notifies the Gateway Server.
+     * <p>
+     * Additionally, if the Entrant is not authorized, raises the security system's alarm.
+     *
+     * @throws RemoteException   Thrown when a Java RMI exception occurs
+     * @throws NotBoundException Thrown when the remote binding does not exist in the {@link Registry}
+     */
     void triggerMotionSensor() throws RemoteException, NotBoundException;
 
     void toggleDoorSensor() throws RemoteException, NotBoundException;
 
     /**
-     * Sets the authorized user who can change the states of all devices.
+     * Activates the Presence Sensor, which marks an Entrant as an authorized user.
      *
+     * @param entrantAuthorized {@code true} if the Entrant is authorized,
+     *                          and the Presence Sensor needs to be activated;
+     *                          {@code false} otherwise
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void setAuthorizedEntrant() throws RemoteException;
+    void setPresenceServerActivated(final boolean entrantAuthorized) throws RemoteException;
 
     /**
-     * Returns boolean value to check if authorized user or intruder is
-     * trigerring events.
+     * Checks whether the Presence Sensor is activated.
      *
-     * @return {@code isAuthorizedUser} The boolean flag which denotes whether
-     * the user is authorized or not
+     * @return {@code true} if the Presence Sensor is activated;
+     * {@code false} otherwise
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    boolean isAuthorizedEntrant() throws RemoteException;
+    boolean isPresenceSensorActivated() throws RemoteException;
 }

@@ -96,9 +96,9 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
             return;
         }
 
-        if (checkAuthorizedUser()) {
-            queryState(getLogicalTime());
-        } else {
+        queryState(getLogicalTime());
+
+        if (!isRemotePresenceSensorActivated()) {
             raiseAlarm();
         }
     }
@@ -107,22 +107,28 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         GatewayServer.connect(sensorConfig.getGatewayAddress()).raiseAlarm();
     }
 
-    private boolean checkAuthorizedUser() {
+    /**
+     * Checks whether a Presence Sensor located on another server is activated or not.
+     *
+     * @return {@code true} if the remote Presence Sensor is activated;
+     * {@code false} otherwise
+     */
+    private boolean isRemotePresenceSensorActivated() {
         final boolean[] authorizedUser = new boolean[1];
 
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
                 .map(ioT -> ((Sensor) ioT))
                 .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
-                .map(sensor -> ((PresenceSensor) sensor))
-                .map(presenceSensor -> getRegisteredIoTs().get(presenceSensor))
+                .map(sensor -> getRegisteredIoTs().get(sensor))
                 .forEach((Address address) -> {
                     try {
-                        authorizedUser[0] = SensorServer.connect(address).isAuthorizedEntrant();
+                        authorizedUser[0] = SensorServer.connect(address).isPresenceSensorActivated();
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
                 });
+
         return authorizedUser[0];
     }
 
@@ -135,31 +141,30 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         final DoorSensor doorSensor = ((DoorSensor) getSensor());
         doorSensor.setData(doorSensor.getData());
 
-        if (checkAuthorizedUser()) {
-            queryState(getLogicalTime());
-        } else {
+        queryState(getLogicalTime());
+
+        if (!isRemotePresenceSensorActivated()) {
             raiseAlarm();
         }
-        queryState(getLogicalTime());
     }
 
     @Override
-    public void setAuthorizedEntrant() throws RemoteException {
+    public void setPresenceServerActivated(final boolean entrantAuthorized) throws RemoteException {
         if (getSensor().getSensorType() != SensorType.PRESENCE) {
             return;
         }
 
         PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
-        presenceSensor.setAuthorizedEntrant();
+        presenceSensor.setActivated(entrantAuthorized);
     }
 
     @Override
-    public boolean isAuthorizedEntrant() {
+    public boolean isPresenceSensorActivated() {
         if (getSensor().getSensorType() != SensorType.PRESENCE) {
             return false;
         }
 
         PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
-        return presenceSensor.isAuthorizedEntrant();
+        return presenceSensor.isActivated();
     }
 }

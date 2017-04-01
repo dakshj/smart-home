@@ -18,16 +18,10 @@ public interface IoTServer {
     void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs, final long senderLogicalTime)
             throws RemoteException;
 
-    /**
-     * Sets the synchronisationOffset of the sensor
-     *
-     * @param synchronizationOffset The value to which offset needs to be set
-     * @throws RemoteException Thrown when a Java RMI exception occurs
-     */
     void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException;
 
     /**
-     * Sends the current system time of the sensor
+     * Returns the current system time of this IoT server.
      *
      * @return The current system time
      * @throws RemoteException Thrown when a Java RMI exception occurs

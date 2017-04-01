@@ -7,18 +7,18 @@ import java.util.UUID;
 
 public class PresenceSensor extends Sensor<Void> {
 
-    private boolean authorizedEntrant;
+    private boolean activated;
 
     public PresenceSensor(final UUID id, final IoTType ioTType, final SensorType sensorType) {
         super(id, ioTType, sensorType);
-        authorizedEntrant = false;
+        activated = false;
     }
 
-    public void setAuthorizedEntrant() {
-        authorizedEntrant = true;
+    public boolean isActivated() {
+        return activated;
     }
 
-    public boolean isAuthorizedEntrant() {
-        return authorizedEntrant;
+    public void setActivated(final boolean activated) {
+        this.activated = activated;
     }
 }

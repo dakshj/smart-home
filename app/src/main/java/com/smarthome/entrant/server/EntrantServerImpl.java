@@ -1,9 +1,10 @@
 package com.smarthome.entrant.server;
 
-import com.smarthome.ioT.device.DeviceServer;
 import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
+import com.smarthome.ioT.device.DeviceServer;
 import com.smarthome.ioT.gateway.GatewayServer;
+import com.smarthome.ioT.sensor.SensorServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.Entrant;
@@ -11,9 +12,7 @@ import com.smarthome.model.IoT;
 import com.smarthome.model.config.EntrantConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
-import com.smarthome.model.sensor.PresenceSensor;
 import com.smarthome.model.sensor.Sensor;
-import com.smarthome.ioT.sensor.SensorServer;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -37,7 +36,7 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
         try {
             setRegisteredIoTs(GatewayServer.connect(entrantConfig.getGatewayAddress())
                     .fetchRegisteredIoTs());
-            validateEntrant();
+            setPresenceSensorActivationStatus();
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
@@ -45,22 +44,23 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
         triggerIoTs();
     }
 
-    private void validateEntrant() {
-        if (entrantConfig.isAuthorized()) {
-            getRegisteredIoTs().keySet().stream()
-                    .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
-                    .map(ioT -> ((Sensor) ioT))
-                    .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
-                    .map(sensor -> ((PresenceSensor) sensor))
-                    .map(presenceSensor -> getRegisteredIoTs().get(presenceSensor))
-                    .forEach(address -> {
-                        try {
-                            SensorServer.connect(address).setAuthorizedEntrant();
-                        } catch (RemoteException | NotBoundException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        }
+    /**
+     * Activates the Presence Sensor if the current entrant is an authorized user.
+     */
+    private void setPresenceSensorActivationStatus() {
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                .map(ioT -> ((Sensor) ioT))
+                .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
+                .map(sensor -> getRegisteredIoTs().get(sensor))
+                .forEach(address -> {
+                    try {
+                        SensorServer.connect(address)
+                                .setPresenceServerActivated(entrantConfig.isAuthorized());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     private void triggerIoTs() {
