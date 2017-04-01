@@ -64,8 +64,7 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
 
     protected abstract String getName();
 
-    @Override
-    public Config getConfig() {
+    protected Config getConfig() {
         return config;
     }
 
@@ -106,6 +105,11 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
     @Override
     public void setSynchronizationOffset(final long synchronizationOffset) {
         this.synchronizationOffset = synchronizationOffset;
+    }
+
+    @Override
+    public long getCurrentTime() throws RemoteException {
+        return System.currentTimeMillis() + getConfig().getRandomTimeOffset();
     }
 
     protected Map<IoT, Address> getRegisteredIoTs() {

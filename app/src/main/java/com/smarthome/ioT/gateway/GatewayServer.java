@@ -6,13 +6,12 @@ import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
 
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Map;
 
-public interface GatewayServer extends IoTServer, Remote {
+public interface GatewayServer extends IoTServer {
 
     String NAME = "Gateway Server";
 
@@ -48,7 +47,7 @@ public interface GatewayServer extends IoTServer, Remote {
      *
      * @param ioT The identifier of that ioT
      */
-    void queryState(final IoT ioT);
+    void queryState(final IoT ioT) throws RemoteException;
 
     /**
      * Reports the current state of the sensor.
@@ -67,7 +66,7 @@ public interface GatewayServer extends IoTServer, Remote {
      * @param device The Device whose state needs to be changed
      * @param state  The new state of the device
      */
-    void setDeviceState(final Device device, final boolean state);
+    void setDeviceState(final Device device, final boolean state) throws RemoteException;
 
     Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException;
 

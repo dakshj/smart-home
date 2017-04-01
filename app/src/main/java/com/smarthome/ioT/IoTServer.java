@@ -2,12 +2,12 @@ package com.smarthome.ioT;
 
 import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
-import com.smarthome.model.config.Config;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
 
-public interface IoTServer {
+public interface IoTServer extends Remote {
 
     /**
      * Sets the {@link Map} of all IoTs which have been registered to the Gateway Server.
@@ -27,9 +27,5 @@ public interface IoTServer {
      * @return The current system time
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    default long getCurrentTime() throws RemoteException {
-        return System.currentTimeMillis() + getConfig().getRandomTimeOffset();
-    }
-
-    Config getConfig();
+    long getCurrentTime() throws RemoteException;
 }

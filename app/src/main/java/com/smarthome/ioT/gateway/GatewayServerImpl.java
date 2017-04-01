@@ -89,7 +89,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     @Override
-    public void queryState(final IoT ioT) {
+    public void queryState(final IoT ioT) throws RemoteException {
         incrementLogicalTime(0);
 
         if (getRegisteredIoTs().containsKey(ioT)) {
@@ -154,7 +154,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     @Override
-    public void setDeviceState(final Device device, final boolean state) {
+    public void setDeviceState(final Device device, final boolean state) throws RemoteException {
         incrementLogicalTime(0);
 
         try {

@@ -8,12 +8,11 @@ import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.TemperatureSensor;
 
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public interface DbServer extends IoTServer, Remote {
+public interface DbServer extends IoTServer {
 
     String NAME = "DB Server";
 

@@ -4,12 +4,11 @@ import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
 
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public interface SensorServer extends IoTServer, Remote {
+public interface SensorServer extends IoTServer {
 
     String NAME = "Sensor Server";
 
