@@ -22,6 +22,8 @@ import java.util.UUID;
 
 public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
+    private boolean securityActivated;
+
     public GatewayServerImpl(final GatewayConfig gatewayConfig) throws RemoteException {
         super(gatewayConfig, false);
 
@@ -238,5 +240,19 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     private GatewayConfig getGatewayConfig() {
         return ((GatewayConfig) getConfig());
+    }
+
+    private boolean isSecurityActivated() {
+        return securityActivated;
+    }
+
+    /**
+     * Activates or deactivates the Security System.
+     *
+     * @param securityActivated {@code true} if the system needs to be activated;
+     *                          {@code false} otherwise
+     */
+    private void setSecurityActivated(final boolean securityActivated) {
+        this.securityActivated = securityActivated;
     }
 }
