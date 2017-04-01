@@ -24,7 +24,7 @@ import java.util.UUID;
 
 public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
-    private static final long TIME_RESYNC_DELAY = 10 * 1000;
+    private static final long TIME_RESYNC_DELAY = 20 * 1000;
 
     private boolean securityActivated;
 
@@ -54,38 +54,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     public void register(final IoT ioT, final Address address, final long senderLogicalTime)
             throws RemoteException {
         incrementLogicalTime(senderLogicalTime);
-
-        final UUID uuid = UUID.randomUUID();
-
-        switch (ioT.getIoTType()) {
-            case SENSOR:
-                Sensor sensor = ((Sensor) ioT);
-
-                switch (sensor.getSensorType()) {
-                    case TEMPERATURE:
-                        sensor = new TemperatureSensor(uuid, sensor.getIoTType(), sensor.getSensorType());
-                        break;
-
-                    case MOTION:
-                        sensor = new MotionSensor(uuid, sensor.getIoTType(), sensor.getSensorType());
-                        break;
-
-                    case DOOR:
-                        sensor = new DoorSensor(uuid, sensor.getIoTType(), sensor.getSensorType());
-                        break;
-                }
-
-                getRegisteredIoTs().put(sensor, address);
-                break;
-
-            case DEVICE:
-                Device device = (Device) ioT;
-
-                device = new Device(uuid, device.getIoTType(), device.getDeviceType());
-
-                getRegisteredIoTs().put(device, address);
-                break;
-        }
+        getRegisteredIoTs().put(ioT, address);
     }
 
     @Override
@@ -178,8 +147,8 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     private void waitForUserToStartLeaderElectionAndTimeSync() {
-        System.out.println("Please press Enter after all IoT servers are running.\n" +
-                "Pressing Enter will being the Leader Election and Time Synchronization jobs.");
+        System.out.println("\nPlease press Enter after all IoT servers are running.\n" +
+                "Pressing Enter will begin the Leader Election and Time Synchronization jobs.");
         new Scanner(System.in).next();
 
         periodicallyElectLeaderAndSynchronizeClocks();
@@ -195,7 +164,9 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
+                System.out.println("\n~~~~~~Resynchronizing Times~~~~~~");
                 periodicallyElectLeaderAndSynchronizeClocks();
+                System.out.println("\n~~~~~~Resynchronization complete~~~~~~\n");
             }
         }, TIME_RESYNC_DELAY);
     }
@@ -207,10 +178,14 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
      * Additionally, initiates Clock Synchronization in the chosen leader.
      */
     private void electLeaderAndSynchronizeClocks() {
+        System.out.println("\nElecting a Leader for Time Synchronization...");
         if (isLeader()) {
+            System.out.println("I am the Leader.");
             synchronizeTime();
         } else {
+            System.out.println("Broadcasting Map of Registered IoTs, to all IoTs...");
             broadcastRegisteredIoTs();
+            System.out.println("Broadcast complete.");
         }
     }
 

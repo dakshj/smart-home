@@ -1,6 +1,7 @@
 package com.smarthome.model;
 
 import com.smarthome.enums.IoTType;
+import com.smarthome.model.sensor.Sensor;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -36,5 +37,22 @@ public class IoT implements Serializable {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        switch (getIoTType()) {
+            case GATEWAY:
+            case DB:
+                return getIoTType().name();
+
+            case DEVICE:
+                return ((Device) this).getDeviceType().name();
+
+            case SENSOR:
+                return ((Sensor) this).getSensorType().name();
+        }
+
+        return null;
     }
 }

@@ -8,6 +8,7 @@ import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
 import com.smarthome.model.config.SensorConfig;
 import com.smarthome.model.sensor.DoorSensor;
+import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.PresenceSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
@@ -34,7 +35,25 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
 
     @Override
     public IoT createIoT() {
-        return new Sensor(UUID.randomUUID(), IoTType.SENSOR, getSensorConfig().getSensorType());
+        switch (getSensorConfig().getSensorType()) {
+            case TEMPERATURE:
+                return new TemperatureSensor(UUID.randomUUID(), IoTType.SENSOR,
+                        getSensorConfig().getSensorType());
+
+            case MOTION:
+                return new MotionSensor(UUID.randomUUID(), IoTType.SENSOR,
+                        getSensorConfig().getSensorType());
+
+            case DOOR:
+                return new DoorSensor(UUID.randomUUID(), IoTType.SENSOR,
+                        getSensorConfig().getSensorType());
+
+            case PRESENCE:
+                return new PresenceSensor(UUID.randomUUID(), IoTType.SENSOR,
+                        getSensorConfig().getSensorType());
+        }
+
+        return null;
     }
 
     private SensorConfig getSensorConfig() {

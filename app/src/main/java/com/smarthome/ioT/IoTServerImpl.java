@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTServer {
+public abstract class IoTServerImpl implements IoTServer {
 
     private final Config config;
     private final IoT ioT;
@@ -30,22 +30,38 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
     private long synchronizationOffset;
     private Map<IoT, Address> registeredIoTs;
 
-    protected IoTServerImpl(final Config config, final boolean registerToGateway)
+    /**
+     * Creates an instance of an IoT using a provided config.
+     * <p>
+     * Additionally, registers itself remotely to the Gateway, if itself is not a Gateway.
+     *
+     * @param config                    The config used to initialize its IoT server
+     * @param registerRemotelyToGateway If {@code true} then register remotely to Gateway;
+     *                                  else register locally to its contained
+     *                                  {@link #registeredIoTs}.
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    protected IoTServerImpl(final Config config, final boolean registerRemotelyToGateway)
             throws RemoteException {
         this.config = config;
         ioT = createIoT();
         offsetMap = new HashMap<>();
         setLogicalTime(0);
+        registeredIoTs = new HashMap<>();
 
         startServer(config.getAddress().getPortNo());
 
-        if (registerToGateway) {
+        if (registerRemotelyToGateway) {
+            System.out.println("Registering to Gateway...");
             try {
                 GatewayServer.connect(config.getGatewayAddress()).register(ioT, config.getAddress(),
                         getLogicalTime());
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
             }
+            System.out.println("Successfully registered.");
+        } else {
+            getRegisteredIoTs().put(getIoT(), getConfig().getAddress());
         }
     }
 
@@ -58,8 +74,11 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
     private void startServer(final int portNo) throws RemoteException {
+        UnicastRemoteObject.exportObject(this, portNo);
         final Registry registry = LocateRegistry.createRegistry(portNo);
         registry.rebind(getName(), this);
+
+        System.out.println("Server started.");
     }
 
     protected abstract String getName();
@@ -104,6 +123,9 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
 
     @Override
     public void setSynchronizationOffset(final long synchronizationOffset) {
+        System.out.println("Received Time Synchronization offset of "
+                + synchronizationOffset + " ms.");
+
         this.synchronizationOffset = synchronizationOffset;
     }
 
@@ -121,8 +143,11 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
             final long senderLogicalTime) throws RemoteException {
         incrementLogicalTime(senderLogicalTime);
 
+        System.out.println("Received Map of Registered IoTs from Gateway.");
+
         this.registeredIoTs = registeredIoTs;
         if (isLeader()) {
+            System.out.println("I am the Leader.");
             synchronizeTime();
         }
     }
@@ -148,12 +173,21 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
      * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>.
      */
     protected void synchronizeTime() {
+        System.out.println("Starting Time Synchronization...");
+
         buildOffsetMap();
+
+        System.out.println("Time Synchronization Offset Map:");
+        getOffsetMap().keySet()
+                .forEach(ioT1 ->
+                        System.out.printf("\t%-10s %-10s%n", ioT1, getOffsetMap().get(ioT1)));
 
         final long[] offsetTotal = {0};
         getOffsetMap().values().forEach(offset -> offsetTotal[0] += offset);
 
         sendSynchronizationOffsets(offsetTotal[0] / getOffsetMap().size());
+
+        System.out.println("\nTime Synchronization complete.");
     }
 
     /**
@@ -245,7 +279,6 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
     private void sendSynchronizationOffsets(final long offsetAverage) {
         // Send synchronization offset to self
         setSynchronizationOffset(
-                // TODO confirm the below formula, if this or reverse of it
                 getOffsetMap().get(getIoT()) - offsetAverage
         );
 
@@ -257,7 +290,6 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         GatewayServer.connect(address).setSynchronizationOffset(
-                                // TODO confirm the below formula, if this or reverse of it
                                 getOffsetMap().get(ioT) - offsetAverage
                         );
                     } catch (RemoteException | NotBoundException e) {
@@ -273,7 +305,6 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DbServer.connect(address).setSynchronizationOffset(
-                                // TODO confirm the below formula, if this or reverse of it
                                 getOffsetMap().get(ioT) - offsetAverage
                         );
                     } catch (RemoteException | NotBoundException e) {
@@ -289,7 +320,6 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         SensorServer.connect(address).setSynchronizationOffset(
-                                // TODO confirm the below formula, if this or reverse of it
                                 getOffsetMap().get(ioT) - offsetAverage
                         );
                     } catch (RemoteException | NotBoundException e) {
@@ -305,7 +335,6 @@ public abstract class IoTServerImpl extends UnicastRemoteObject implements IoTSe
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DeviceServer.connect(address).setSynchronizationOffset(
-                                // TODO confirm the below formula, if this or reverse of it
                                 getOffsetMap().get(ioT) - offsetAverage
                         );
                     } catch (RemoteException | NotBoundException e) {
