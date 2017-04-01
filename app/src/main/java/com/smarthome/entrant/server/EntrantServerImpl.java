@@ -118,7 +118,7 @@ public class EntrantServerImpl extends UnicastRemoteObject implements EntrantSer
     /**
      * <p>
      * Starts the Entrant Server on the provided port number.
-     * Uses {@value #NAME} as the name to associate with the remote reference.
+     * Uses {@value NAME} as the name to associate with the remote reference.
      *
      * @param portNo The port number to start the Entrant Server on
      * @throws RemoteException Thrown when a Java RMI exception occurs

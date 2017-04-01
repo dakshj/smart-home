@@ -18,7 +18,7 @@ class Logger {
 
     /**
      * Initializes (and creates the file on disk, if necessary) a {@link File} object pointing to
-     * {@value #LOG_FILE_NAME}.
+     * {@value LOG_FILE_NAME}.
      */
     Logger() {
         final URL resource = ClassLoader.getSystemClassLoader().getResource(".");
@@ -45,7 +45,7 @@ class Logger {
     }
 
     /**
-     * Logs the {@link Log} model as a single line to {@value #LOG_FILE_NAME}.
+     * Logs the {@link Log} model as a single line to {@value LOG_FILE_NAME}.
      *
      * @param log The object to log
      */
@@ -70,9 +70,9 @@ class Logger {
     }
 
     /**
-     * Appends a single line to {@value #LOG_FILE_NAME}.
+     * Appends a single line to {@value LOG_FILE_NAME}.
      *
-     * @param line The line to be appended to {@value #LOG_FILE_NAME}
+     * @param line The line to be appended to {@value LOG_FILE_NAME}
      */
     private void appendLine(final String line) {
         try {

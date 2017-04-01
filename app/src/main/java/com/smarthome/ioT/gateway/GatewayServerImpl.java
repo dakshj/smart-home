@@ -18,9 +18,13 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
+
+    private static final long TIME_RESYNC_DELAY = 10 * 1000;
 
     private boolean securityActivated;
 
@@ -177,14 +181,32 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
         System.out.println("Please press Enter after all IoT servers are running.\n" +
                 "Pressing Enter will being the Leader Election and Time Synchronization jobs.");
         new Scanner(System.in).next();
-        electLeader();
+
+        periodicallyElectLeaderAndSynchronizeClocks();
+    }
+
+    /**
+     * Performs {@link #electLeaderAndSynchronizeClocks()} and sets a {@value TIME_RESYNC_DELAY} ms
+     * Timer to rerun the method.
+     */
+    private void periodicallyElectLeaderAndSynchronizeClocks() {
+        electLeaderAndSynchronizeClocks();
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                periodicallyElectLeaderAndSynchronizeClocks();
+            }
+        }, TIME_RESYNC_DELAY);
     }
 
     /**
      * Elects a leader using the
      * <a href="https://en.wikipedia.org/wiki/Bully_algorithm">Bully algorithm</a>.
+     * <p>
+     * Additionally, initiates Clock Synchronization in the chosen leader.
      */
-    private void electLeader() {
+    private void electLeaderAndSynchronizeClocks() {
         if (isLeader()) {
             synchronizeTime();
         } else {
