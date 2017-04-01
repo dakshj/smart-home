@@ -7,6 +7,6 @@
     "host": "localhost",
     "portNo": 1100
   },
-  "entrantType": "USER",
+  "entrantType": 0,
   "authorized": "true"
 }

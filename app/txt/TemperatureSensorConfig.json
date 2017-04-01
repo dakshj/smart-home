@@ -7,5 +7,5 @@
     "host": "localhost",
     "portNo": 1100
   },
-  "sensorType": "TEMPERATURE"
+  "sensorType": 0
 }

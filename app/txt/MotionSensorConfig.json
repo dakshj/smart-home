@@ -7,5 +7,5 @@
     "host": "localhost",
     "portNo": 1100
   },
-  "sensorType": "MOTION"
+  "sensorType": 1
 }

@@ -7,5 +7,5 @@
     "host": "localhost",
     "portNo": 1100
   },
-  "sensorType": "PRESENCE"
+  "sensorType": 3
 }
