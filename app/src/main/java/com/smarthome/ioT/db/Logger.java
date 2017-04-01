@@ -1,6 +1,7 @@
 package com.smarthome.ioT.db;
 
 import com.smarthome.exception.LogFileCreationFailedException;
+import com.smarthome.model.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
-import java.util.List;
 
-public class Logger {
+class Logger {
 
     private static final String LOG_FILE_NAME = "Smart Home Logs.txt";
 
@@ -45,22 +45,39 @@ public class Logger {
     }
 
     /**
+     * Logs the {@link Log} model as a single line to {@value #LOG_FILE_NAME}.
+     *
+     * @param log The object to log
+     */
+    void log(final Log log) {
+        appendLine("" +
+                (log.getLogType() != null ? log.getLogType().ordinal() : null) +
+                ',' +
+                log.getId() +
+                ',' +
+                (log.getIoTType() != null ? log.getIoTType().ordinal() : null) +
+                ',' +
+                (log.getSensorType() != null ? log.getSensorType().ordinal() : null) +
+                ',' +
+                (log.getDeviceType() != null ? log.getDeviceType().ordinal() : null) +
+                ',' +
+                log.getChronologicalTime() +
+                ',' +
+                log.getLogicalTime() +
+                ',' +
+                log.getMessage()
+        );
+    }
+
+    /**
      * Appends a single line to {@value #LOG_FILE_NAME}.
      *
      * @param line The line to be appended to {@value #LOG_FILE_NAME}
      */
-    public void appendLine(final String line) {
-        appendLines(Collections.singletonList(line));
-    }
-
-    /**
-     * Appends multiple lines to {@value #LOG_FILE_NAME}.
-     *
-     * @param lines The {@link List} of lines to be appended to {@value #LOG_FILE_NAME}
-     */
-    public void appendLines(final List<String> lines) {
+    private void appendLine(final String line) {
         try {
-            Files.write(getLogFile().toPath(), lines, StandardOpenOption.APPEND);
+            Files.write(getLogFile().toPath(), Collections.singletonList(line),
+                    StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.out.println("Failed to write lines to " + LOG_FILE_NAME + "!");
             e.printStackTrace();

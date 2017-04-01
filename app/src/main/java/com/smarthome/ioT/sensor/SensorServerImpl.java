@@ -68,6 +68,7 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
                 TemperatureSensor.VALUE_MAX
         );
 
+        //noinspection RedundantCast
         ((TemperatureSensor) getSensor()).setData(nextTemp);
 
         new Timer().schedule(new TimerTask() {

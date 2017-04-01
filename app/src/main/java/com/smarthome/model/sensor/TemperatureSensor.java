@@ -28,23 +28,7 @@ public class TemperatureSensor extends Sensor<Double> implements Serializable {
      */
     public static final long VALUE_MAX = 85;
 
-    private Double oldData;
-
     public TemperatureSensor(final UUID id, final IoTType ioTType, final SensorType sensorType) {
         super(id, ioTType, sensorType);
-    }
-
-    @Override
-    public void setData(final Double data) {
-        setOldData(getData());
-        super.setData(data);
-    }
-
-    private Double getOldData() {
-        return oldData;
-    }
-
-    private void setOldData(final Double oldData) {
-        this.oldData = oldData;
     }
 }
