@@ -46,14 +46,15 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     @Override
     public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs,
-            final long senderLogicalTime) throws RemoteException {
+            final long senderLogicalTime, final UUID senderId) throws RemoteException {
         // No-op
     }
 
     @Override
-    public void register(final IoT ioT, final Address address, final long senderLogicalTime)
+    public void register(final IoT ioT, final Address address, final long senderLogicalTime,
+            final UUID senderId)
             throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
+        incrementLogicalTime(senderLogicalTime, senderId);
         getRegisteredIoTs().put(ioT, address);
     }
 
@@ -63,17 +64,19 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
      * @param ioT The identifier of that ioT
      */
     private void queryState(final IoT ioT) throws RemoteException {
-        incrementLogicalTime(0);
+        incrementLogicalTime(0, null);
 
         if (getRegisteredIoTs().containsKey(ioT)) {
             try {
                 switch (ioT.getIoTType()) {
                     case SENSOR:
-                        SensorServer.connect(getRegisteredIoTs().get(ioT)).queryState(getLogicalTime());
+                        SensorServer.connect(getRegisteredIoTs().get(ioT))
+                                .queryState(getLogicalTime(), getIoT().getId());
                         break;
 
                     case DEVICE:
-                        DeviceServer.connect(getRegisteredIoTs().get(ioT)).queryState(getLogicalTime());
+                        DeviceServer.connect(getRegisteredIoTs().get(ioT))
+                                .queryState(getLogicalTime(), getIoT().getId());
                         break;
                 }
             } catch (RemoteException | NotBoundException e) {
@@ -99,9 +102,9 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     @Override
-    public void reportState(final IoT ioT, final long time, final long senderLogicalTime)
-            throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
+    public void reportState(final IoT ioT, final long time, final long senderLogicalTime,
+            final UUID senderId) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime, senderId);
 
         DbServer dbServer = null;
 
@@ -179,10 +182,11 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
      * @param state  The new state of the device
      */
     private void setDeviceState(final Device device, final boolean state) {
-        incrementLogicalTime(0);
+        incrementLogicalTime(0, null);
 
         try {
-            DeviceServer.connect(getRegisteredIoTs().get(device)).setState(state, getLogicalTime());
+            DeviceServer.connect(getRegisteredIoTs().get(device))
+                    .setState(state, getLogicalTime(), getIoT().getId());
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
@@ -190,14 +194,14 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     @Override
     public Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException {
-        incrementLogicalTime(0);
+        incrementLogicalTime(0, null);
 
         return getRegisteredIoTs();
     }
 
     @Override
-    public void raiseAlarm(final long senderLogicalTime) throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
+    public void raiseAlarm(final long senderLogicalTime, final UUID senderId) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime, senderId);
 
         if (alreadyRaisedAlarm) {
             return;
@@ -213,7 +217,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     @Override
     public void entrantExecutionFinished() throws RemoteException {
-        incrementLogicalTime(0);
+        incrementLogicalTime(0, null);
         alreadyRaisedAlarm = false;
     }
 

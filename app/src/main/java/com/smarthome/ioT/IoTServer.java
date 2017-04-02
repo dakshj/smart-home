@@ -6,6 +6,7 @@ import com.smarthome.model.IoT;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
+import java.util.UUID;
 
 public interface IoTServer extends Remote {
 
@@ -14,10 +15,11 @@ public interface IoTServer extends Remote {
      *
      * @param registeredIoTs    The Map to set within this server
      * @param senderLogicalTime The logical time of the calling IoT server
+     * @param senderId          The {@link IoT#id} of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs, final long senderLogicalTime)
-            throws RemoteException;
+    void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs, final long senderLogicalTime,
+            final UUID senderId) throws RemoteException;
 
     /**
      * Sets the synchronization offset of this IoT server, calculated using the
@@ -25,9 +27,11 @@ public interface IoTServer extends Remote {
      *
      * @param synchronizationOffset The synchronization offset of the chronological clock
      * @param senderLogicalTime     The logical time of the calling IoT server
+     * @param senderId              The {@link IoT#id} of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void setSynchronizationOffset(final long synchronizationOffset, final long senderLogicalTime)
+    void setSynchronizationOffset(final long synchronizationOffset, final long senderLogicalTime,
+            final UUID senderId)
             throws RemoteException;
 
     /**

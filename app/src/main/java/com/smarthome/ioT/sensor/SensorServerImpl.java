@@ -62,12 +62,13 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
     }
 
     @Override
-    public void queryState(final long senderLogicalTime) throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
+    public void queryState(final long senderLogicalTime, final UUID senderId) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime, senderId);
 
         try {
             GatewayServer.connect(getSensorConfig().getGatewayAddress())
-                    .reportState(getSensor(), getSynchronizedTime(), getLogicalTime());
+                    .reportState(getSensor(), getSynchronizedTime(), getLogicalTime(),
+                            getIoT().getId());
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
@@ -81,7 +82,7 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
 
         System.out.println("Detected motion.");
 
-        queryState(getLogicalTime());
+        queryState(0, null);
 
         if (!isRemotePresenceSensorActivated()) {
             raiseRemoteAlarm();
@@ -99,7 +100,7 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         final DoorSensor doorSensor = ((DoorSensor) getSensor());
         doorSensor.setData(opened);
 
-        queryState(getLogicalTime());
+        queryState(0, null);
     }
 
     @Override
@@ -108,19 +109,20 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
             return;
         }
 
-        incrementLogicalTime(0);
+        incrementLogicalTime(0, null);
 
         PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
         presenceSensor.setData(entrantAuthorized);
     }
 
     @Override
-    public boolean isPresenceSensorActivated(final long senderLogicalTime) throws RemoteException {
+    public boolean isPresenceSensorActivated(final long senderLogicalTime,
+            final UUID senderId) throws RemoteException {
         if (getSensor().getSensorType() != SensorType.PRESENCE) {
             return false;
         }
 
-        incrementLogicalTime(senderLogicalTime);
+        incrementLogicalTime(senderLogicalTime, senderId);
 
         PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
         return presenceSensor.getData();

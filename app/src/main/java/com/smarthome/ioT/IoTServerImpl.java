@@ -63,8 +63,8 @@ public abstract class IoTServerImpl implements IoTServer {
         if (registerRemotelyToGateway) {
             System.out.println("Registering to Gateway...");
             try {
-                GatewayServer.connect(serverConfig.getGatewayAddress()).register(ioT, serverConfig.getAddress(),
-                        getLogicalTime());
+                GatewayServer.connect(serverConfig.getGatewayAddress())
+                        .register(ioT, serverConfig.getAddress(), getLogicalTime(), getIoT().getId());
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
             }
@@ -118,9 +118,25 @@ public abstract class IoTServerImpl implements IoTServer {
         this.logicalTime = logicalTime;
     }
 
-    protected void incrementLogicalTime(final long senderLogicalTime) {
+    /**
+     * If the sender's logical time is greater than the receiver's logical time,
+     * then the receiver's logical time is set to the sender's logical time.
+     * <p>
+     * If both are same, then the receiver's logical time is set to the logical time of
+     * the one whose {@link IoT#id} is higher. Thus, the id of an IoT is used as a tie-breaker.
+     * <p>
+     * Finally, the receiver's logical time is incremented.
+     *
+     * @param senderLogicalTime The logical time of the calling IoT server
+     * @param senderId          The {@link IoT#id} of the calling IoT server
+     */
+    protected void incrementLogicalTime(final long senderLogicalTime, final UUID senderId) {
         if (getLogicalTime() < senderLogicalTime) {
             setLogicalTime(senderLogicalTime);
+        } else if (getLogicalTime() == senderLogicalTime && senderId != null) {
+            if (getIoT().getId().compareTo(senderId) < 0) {
+                setLogicalTime(senderLogicalTime);
+            }
         }
 
         setLogicalTime(getLogicalTime() + 1);
@@ -132,8 +148,8 @@ public abstract class IoTServerImpl implements IoTServer {
 
     @Override
     public void setSynchronizationOffset(final long synchronizationOffset,
-            final long senderLogicalTime) throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
+            final long senderLogicalTime, final UUID senderId) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime, senderId);
 
         System.out.println("Received Time Synchronization offset of "
                 + synchronizationOffset + " ms.");
@@ -162,8 +178,8 @@ public abstract class IoTServerImpl implements IoTServer {
 
     @Override
     public void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs,
-            final long senderLogicalTime) throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
+            final long senderLogicalTime, final UUID senderId) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime, senderId);
 
         System.out.println("Received Map of Registered IoTs from Gateway.");
 
@@ -316,7 +332,7 @@ public abstract class IoTServerImpl implements IoTServer {
     private void sendSynchronizationOffsets(final long offsetAverage) throws RemoteException {
         // Send synchronization offset to self
         setSynchronizationOffset(
-                getOffsetMap().get(getIoT()) - offsetAverage, getLogicalTime()
+                getOffsetMap().get(getIoT()) - offsetAverage, 0, null
         );
 
         // Send synchronization offset to Gateway Server
@@ -327,7 +343,8 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         GatewayServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
+                                getOffsetMap().get(ioT) - offsetAverage,
+                                getLogicalTime(), getIoT().getId()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
@@ -342,7 +359,8 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DbServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
+                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime(),
+                                getIoT().getId()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
@@ -357,7 +375,8 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         SensorServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
+                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime(),
+                                getIoT().getId()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
@@ -372,7 +391,8 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DeviceServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
+                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime(),
+                                getIoT().getId()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
@@ -415,7 +435,7 @@ public abstract class IoTServerImpl implements IoTServer {
                 .forEach((Address address) -> {
                     try {
                         authorizedUser[0] = SensorServer.connect(address)
-                                .isPresenceSensorActivated(getLogicalTime());
+                                .isPresenceSensorActivated(getLogicalTime(), getIoT().getId());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
@@ -429,7 +449,8 @@ public abstract class IoTServerImpl implements IoTServer {
         System.out.println("Informing Gateway...");
 
         try {
-            GatewayServer.connect(getServerConfig().getGatewayAddress()).raiseAlarm(getLogicalTime());
+            GatewayServer.connect(getServerConfig().getGatewayAddress())
+                    .raiseAlarm(getLogicalTime(), getIoT().getId());
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
@@ -474,7 +495,7 @@ public abstract class IoTServerImpl implements IoTServer {
      * Broadcasts the {@link Map} of all registered IoTs to each IoT.
      */
     private void broadcastRegisteredIoTs() {
-        incrementLogicalTime(0);
+        incrementLogicalTime(0, null);
 
         // Send to DB
         getRegisteredIoTs().keySet().stream()
@@ -483,7 +504,7 @@ public abstract class IoTServerImpl implements IoTServer {
                 .forEach(address -> new Thread(() -> {
                     try {
                         DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
-                                getLogicalTime());
+                                getLogicalTime(), getIoT().getId());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
@@ -496,7 +517,7 @@ public abstract class IoTServerImpl implements IoTServer {
                 .forEach(address -> new Thread(() -> {
                     try {
                         SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
-                                getLogicalTime());
+                                getLogicalTime(), getIoT().getId());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
@@ -509,7 +530,7 @@ public abstract class IoTServerImpl implements IoTServer {
                 .forEach(address -> new Thread(() -> {
                     try {
                         DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
-                                getLogicalTime());
+                                getLogicalTime(), getIoT().getId());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }

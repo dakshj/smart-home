@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Map;
+import java.util.UUID;
 
 public interface GatewayServer extends IoTServer {
 
@@ -36,10 +37,11 @@ public interface GatewayServer extends IoTServer {
      * @param ioT               The IoT which needs to be registered
      * @param address           The address of the IoT Server
      * @param senderLogicalTime The logical time of the calling IoT server
+     * @param senderId          The {@link IoT#id} of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void register(final IoT ioT, final Address address, final long senderLogicalTime)
-            throws RemoteException;
+    void register(final IoT ioT, final Address address, final long senderLogicalTime,
+            final UUID senderId) throws RemoteException;
 
     /**
      * Reports the current state of the sensor.
@@ -47,10 +49,11 @@ public interface GatewayServer extends IoTServer {
      * @param ioT               The IoT model object, containing the current state of the IoT
      * @param time              The synchronized System time when the IoT state was reported
      * @param senderLogicalTime The logical time of the calling IoT server
+     * @param senderId          The {@link IoT#id} of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void reportState(final IoT ioT, final long time, final long senderLogicalTime)
-            throws RemoteException;
+    void reportState(final IoT ioT, final long time, final long senderLogicalTime,
+            final UUID senderId) throws RemoteException;
 
     /**
      * Returns the {@link Map} of registered IoTs to the calling IoT server.
@@ -64,9 +67,10 @@ public interface GatewayServer extends IoTServer {
      * Raises an alarm to alert that an intruder has entered the house.
      *
      * @param senderLogicalTime The logical time of the calling IoT server
+     * @param senderId          The {@link IoT#id} of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void raiseAlarm(final long senderLogicalTime) throws RemoteException;
+    void raiseAlarm(final long senderLogicalTime, final UUID senderId) throws RemoteException;
 
     /**
      * Notifies that the Entrant has finished its execution.

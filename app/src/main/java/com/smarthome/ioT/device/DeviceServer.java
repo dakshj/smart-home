@@ -2,11 +2,13 @@ package com.smarthome.ioT.device;
 
 import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
+import com.smarthome.model.IoT;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.UUID;
 
 public interface DeviceServer extends IoTServer {
 
@@ -30,18 +32,21 @@ public interface DeviceServer extends IoTServer {
      * Returns the current state of this device.
      *
      * @param senderLogicalTime The logical time of the calling IoT server
+     * @param senderId          The {@link IoT#id} of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void queryState(final long senderLogicalTime) throws RemoteException;
+    void queryState(final long senderLogicalTime, final UUID senderId) throws RemoteException;
 
     /**
      * Sets the state of this device.
      *
      * @param state             The state this device needs to be set to
      * @param senderLogicalTime The logical time of the calling IoT server
+     * @param senderId          The {@link IoT#id} of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void setState(final boolean state, final long senderLogicalTime) throws RemoteException;
+    void setState(final boolean state, final long senderLogicalTime,
+            final UUID senderId) throws RemoteException;
 
     /**
      * Toggles the state of the IoT Device
