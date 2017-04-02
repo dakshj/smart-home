@@ -51,6 +51,10 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
     public void setState(final boolean state, final long senderLogicalTime) throws RemoteException {
         incrementLogicalTime(senderLogicalTime);
 
+        if (getDevice().getState() == state) {
+            return;
+        }
+
         getDevice().setState(state);
         System.out.println(getDevice() + " switched "
                 + (getDevice().getState() ? "on" : "off") + ".");
