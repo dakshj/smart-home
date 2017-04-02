@@ -16,13 +16,19 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public abstract class IoTServerImpl implements IoTServer {
+
+    private static final long TIME_RESYNCHRONIZATION_DELAY = 30 * 1000;
+    private static final long TIME_SYNCHRONIZATION_TIMEOUT = 3 * 1000;
 
     private final ServerConfig serverConfig;
     private final IoT ioT;
@@ -31,6 +37,7 @@ public abstract class IoTServerImpl implements IoTServer {
 
     private long synchronizationOffset;
     private Map<IoT, Address> registeredIoTs;
+    private boolean timeSynchronizationSuccessful;
 
     /**
      * Creates an instance of an IoT using a provided config.
@@ -132,11 +139,21 @@ public abstract class IoTServerImpl implements IoTServer {
                 + synchronizationOffset + " ms.");
 
         this.synchronizationOffset = synchronizationOffset;
+
+        if (getIoT().getIoTType() == IoTType.GATEWAY) {
+            System.out.println("\n~~~~~~Time Synchronization Complete~~~~~~\n");
+        }
     }
 
     @Override
     public long getCurrentTime() throws RemoteException {
         return System.currentTimeMillis() + getServerConfig().getRandomTimeOffset();
+    }
+
+    @Override
+    public void leaderElected() throws RemoteException {
+        System.out.println("Received response from Leader.");
+        setTimeSynchronizationSuccessful(true);
     }
 
     protected Map<IoT, Address> getRegisteredIoTs() {
@@ -162,7 +179,7 @@ public abstract class IoTServerImpl implements IoTServer {
      * @return {@code true} if current IoT has the highest UUID;
      * {@code false} otherwise
      */
-    protected boolean isLeader() {
+    private boolean isLeader() {
         final List<UUID> uuidList = getRegisteredIoTs().keySet().stream()
                 .map(IoT::getId)
                 .collect(Collectors.toList());
@@ -173,6 +190,14 @@ public abstract class IoTServerImpl implements IoTServer {
 
         if (leader) {
             System.out.println("I am the Leader.");
+
+            if (getIoT().getIoTType() != IoTType.GATEWAY) {
+                try {
+                    GatewayServer.connect(getServerConfig().getGatewayAddress()).leaderElected();
+                } catch (RemoteException | NotBoundException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return leader;
@@ -182,7 +207,7 @@ public abstract class IoTServerImpl implements IoTServer {
      * Synchronizes the time of all IoTs in this distributed system using the
      * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>.
      */
-    protected void synchronizeTime() {
+    private void synchronizeTime() {
         System.out.println("Starting Time Synchronization...");
 
         buildOffsetMap();
@@ -200,8 +225,6 @@ public abstract class IoTServerImpl implements IoTServer {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-        System.out.println("\nTime Synchronization complete.");
     }
 
     /**
@@ -410,5 +433,134 @@ public abstract class IoTServerImpl implements IoTServer {
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Performs {@link #electLeaderAndSynchronizeClocks()} and sets a {@value TIME_RESYNCHRONIZATION_DELAY} ms
+     * Timer to rerun the method.
+     */
+    protected void periodicallyElectLeaderAndSynchronizeClocks() {
+        electLeaderAndSynchronizeClocks();
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                periodicallyElectLeaderAndSynchronizeClocks();
+            }
+        }, TIME_RESYNCHRONIZATION_DELAY);
+    }
+
+    /**
+     * Elects a leader using the
+     * <a href="https://en.wikipedia.org/wiki/Bully_algorithm">Bully algorithm</a>.
+     * <p>
+     * Additionally, initiates Clock Synchronization in the chosen leader.
+     */
+    private void electLeaderAndSynchronizeClocks() {
+        System.out.println("\n~~~~~~Time Synchronization Started~~~~~~");
+
+        System.out.println("\nElecting a Leader for Time Synchronization...");
+        if (isLeader()) {
+            synchronizeTime();
+        } else {
+            System.out.println("Broadcasting Map of Registered IoTs, to all IoTs...");
+            broadcastRegisteredIoTs();
+            System.out.println("Broadcast complete.");
+            waitForResponseFromElectedLeader();
+        }
+    }
+
+    /**
+     * Broadcasts the {@link Map} of all registered IoTs to each IoT.
+     */
+    private void broadcastRegisteredIoTs() {
+        incrementLogicalTime(0);
+
+        // Send to DB
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DB)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> new Thread(() -> {
+                    try {
+                        DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
+                                getLogicalTime());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                }).start());
+
+        // Send to all Sensors
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.SENSOR)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> new Thread(() -> {
+                    try {
+                        SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
+                                getLogicalTime());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                }).start());
+
+        // Send to all Devices
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DEVICE)
+                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
+                .forEach(address -> new Thread(() -> {
+                    try {
+                        DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
+                                getLogicalTime());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                }).start());
+    }
+
+    /**
+     * Waits for {@value TIME_SYNCHRONIZATION_TIMEOUT} ms for the elected leader to respond.
+     * <p>
+     * If the elected leader has not responded yet, then its information is removed from
+     * {@link #registeredIoTs}, and then
+     * {@link #electLeaderAndSynchronizeClocks()} is rerun.
+     */
+    private void waitForResponseFromElectedLeader() {
+        System.out.println("Waiting for Leader's response...");
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (isTimeSynchronizationSuccessful()) {
+                    setTimeSynchronizationSuccessful(false);
+                } else {
+                    System.out.println("Leader did not respond.");
+
+                    System.out.println("Removing leader from Map of registered IoTs.");
+                    removeHighestIoTFromRegisteredIoTsMap();
+
+                    System.out.println("Rerunning Leader Election for Time Synchronization...");
+                    electLeaderAndSynchronizeClocks();
+                }
+            }
+        }, TIME_SYNCHRONIZATION_TIMEOUT);
+    }
+
+    /**
+     * Removes the IoT with the highest {@link IoT#id} from {@link #registeredIoTs}.
+     * <p>
+     * This is done because the IoT with the highest id did not respond within
+     * {@value TIME_SYNCHRONIZATION_TIMEOUT} ms with a {@link #leaderElected()} message.
+     */
+    private void removeHighestIoTFromRegisteredIoTsMap() {
+        getRegisteredIoTs().keySet().stream()
+                .max(Comparator.comparing(IoT::getId))
+                .ifPresent(ioT -> getRegisteredIoTs().remove(ioT));
+    }
+
+    private boolean isTimeSynchronizationSuccessful() {
+        return timeSynchronizationSuccessful;
+    }
+
+    private void setTimeSynchronizationSuccessful(final boolean timeSynchronizationSuccessful) {
+        this.timeSynchronizationSuccessful = timeSynchronizationSuccessful;
     }
 }

@@ -37,4 +37,6 @@ public interface IoTServer extends Remote {
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
     long getCurrentTime() throws RemoteException;
+
+    void leaderElected() throws RemoteException;
 }

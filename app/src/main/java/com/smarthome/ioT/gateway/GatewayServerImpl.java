@@ -22,13 +22,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
-
-    private static final long TIME_RESYNC_DELAY = 30 * 1000;
 
     private boolean alreadyRaisedAlarm;
 
@@ -247,86 +243,6 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
         new Scanner(System.in).next();
 
         periodicallyElectLeaderAndSynchronizeClocks();
-    }
-
-    /**
-     * Performs {@link #electLeaderAndSynchronizeClocks()} and sets a {@value TIME_RESYNC_DELAY} ms
-     * Timer to rerun the method.
-     */
-    private void periodicallyElectLeaderAndSynchronizeClocks() {
-        electLeaderAndSynchronizeClocks();
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                System.out.println("\n~~~~~~Time Resynchronization Started~~~~~~");
-                periodicallyElectLeaderAndSynchronizeClocks();
-                System.out.println("\n~~~~~~Time Resynchronization Complete~~~~~~\n");
-            }
-        }, TIME_RESYNC_DELAY);
-    }
-
-    /**
-     * Elects a leader using the
-     * <a href="https://en.wikipedia.org/wiki/Bully_algorithm">Bully algorithm</a>.
-     * <p>
-     * Additionally, initiates Clock Synchronization in the chosen leader.
-     */
-    private void electLeaderAndSynchronizeClocks() {
-        System.out.println("\nElecting a Leader for Time Synchronization...");
-        if (isLeader()) {
-            synchronizeTime();
-        } else {
-            System.out.println("Broadcasting Map of Registered IoTs, to all IoTs...");
-            broadcastRegisteredIoTs();
-            System.out.println("Broadcast complete.");
-        }
-    }
-
-    /**
-     * Broadcasts the {@link Map} of all registered IoTs to each IoT.
-     */
-    private void broadcastRegisteredIoTs() {
-        incrementLogicalTime(0);
-
-        // Send to DB
-        getRegisteredIoTs().keySet().stream()
-                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DB)
-                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> new Thread(() -> {
-                    try {
-                        DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
-                                getLogicalTime());
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                }).start());
-
-        // Send to all Sensors
-        getRegisteredIoTs().keySet().stream()
-                .filter(ioT1 -> ioT1.getIoTType() == IoTType.SENSOR)
-                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> new Thread(() -> {
-                    try {
-                        SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
-                                getLogicalTime());
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                }).start());
-
-        // Send to all Devices
-        getRegisteredIoTs().keySet().stream()
-                .filter(ioT1 -> ioT1.getIoTType() == IoTType.DEVICE)
-                .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> new Thread(() -> {
-                    try {
-                        DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
-                                getLogicalTime());
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                }).start());
     }
 
     private GatewayConfig getGatewayConfig() {

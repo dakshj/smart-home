@@ -1,0 +1,202 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gateway START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+
+Please input any character after all IoT servers are running.
+This will begin the Leader Election and Time Synchronization jobs.
+a
+
+~~~~~~Time Synchronization Started~~~~~~
+
+Electing a Leader for Time Synchronization...
+Broadcasting Map of Registered IoTs, to all IoTs...
+Broadcast complete.
+Waiting for Leader's response...
+Received response from Leader.
+Received Time Synchronization offset of 2503 ms.
+
+~~~~~~Time Synchronization Complete~~~~~~
+
+
+~~~~~~Time Synchronization Started~~~~~~
+
+Electing a Leader for Time Synchronization...
+Broadcasting Map of Registered IoTs, to all IoTs...
+Broadcast complete.
+Waiting for Leader's response...
+java.rmi.ConnectException: Connection refused to host: localhost; nested exception is:
+	java.net.ConnectException: Connection refused: connect
+	at sun.rmi.transport.tcp.TCPEndpoint.newSocket(TCPEndpoint.java:619)
+	at sun.rmi.transport.tcp.TCPChannel.createConnection(TCPChannel.java:216)
+	at sun.rmi.transport.tcp.TCPChannel.newConnection(TCPChannel.java:202)
+	at sun.rmi.server.UnicastRef.newCall(UnicastRef.java:342)
+	at sun.rmi.registry.RegistryImpl_Stub.lookup(Unknown Source)
+	at com.smarthome.ioT.sensor.SensorServer.connect(SensorServer.java:26)
+	at com.smarthome.ioT.IoTServerImpl.lambda$null$42(IoTServerImpl.java:530)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.net.DualStackPlainSocketImpl.connect0(Native Method)
+	at java.net.DualStackPlainSocketImpl.socketConnect(DualStackPlainSocketImpl.java:79)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:350)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)
+	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:172)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:589)
+	at java.net.Socket.connect(Socket.java:538)
+	at java.net.Socket.<init>(Socket.java:434)
+	at java.net.Socket.<init>(Socket.java:211)
+	at sun.rmi.transport.proxy.RMIDirectSocketFactory.createSocket(RMIDirectSocketFactory.java:40)
+	at sun.rmi.transport.proxy.RMIMasterSocketFactory.createSocket(RMIMasterSocketFactory.java:148)
+	at sun.rmi.transport.tcp.TCPEndpoint.newSocket(TCPEndpoint.java:613)
+	... 7 more
+Leader did not respond.
+Removing leader from Map of registered IoTs.
+Rerunning Leader Election for Time Synchronization...
+
+~~~~~~Time Synchronization Started~~~~~~
+
+Electing a Leader for Time Synchronization...
+Broadcasting Map of Registered IoTs, to all IoTs...
+Broadcast complete.
+Waiting for Leader's response...
+Received response from Leader.
+Received Time Synchronization offset of 1 ms.
+
+~~~~~~Time Synchronization Complete~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gateway END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DB START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 7499 ms.
+Received Map of Registered IoTs from Gateway.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 4998 ms.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 4999 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DB END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Temperature Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+New Temperature: 79.62°F.
+New Temperature: 66.31°F.
+New Temperature: 78.05°F.
+Received Map of Registered IoTs from Gateway.
+I am the Leader.
+Starting Time Synchronization...
+Time Synchronization Offset Map:
+	DOOR       29997
+	MOTION     9997
+	GATEWAY    19999
+	DB         24995
+	BULB       14995
+	OUTLET     4996
+	TEMPERATURE 0
+	PRESENCE   34996
+Received Time Synchronization offset of -17496 ms.
+New Temperature: 73.92°F.
+New Temperature: 79.43°F.
+New Temperature: 75.0°F.
+New Temperature: 73.1°F.
+
+..................TEMPERATURE SENSOR FAILED..................
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Temperature Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Motion Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -7499 ms.
+Received Map of Registered IoTs from Gateway.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -10001 ms.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -10001 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Motion Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Door Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 12501 ms.
+Received Map of Registered IoTs from Gateway.
+Received Map of Registered IoTs from Gateway.
+I am the Leader.
+Starting Time Synchronization...
+Time Synchronization Offset Map:
+	DOOR       0
+	MOTION     -20003
+	GATEWAY    -10001
+	DB         -5004
+	BULB       -15003
+	OUTLET     -25003
+	PRESENCE   4997
+Received Time Synchronization offset of 10002 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Door Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Presence Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 17500 ms.
+Received Map of Registered IoTs from Gateway.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 14999 ms.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 14999 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Presence Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bulb START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -2501 ms.
+Received Map of Registered IoTs from Gateway.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -5001 ms.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -5001 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bulb END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Outlet START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -12500 ms.
+Received Map of Registered IoTs from Gateway.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -15001 ms.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -15001 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Outlet END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
