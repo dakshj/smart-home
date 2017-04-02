@@ -293,7 +293,7 @@ public abstract class IoTServerImpl implements IoTServer {
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT -> !getIoT().equals(ioT))
                 .filter(ioT -> ioT.getIoTType() == IoTType.GATEWAY)
-                .forEach(ioT -> {
+                .forEach(ioT -> new Thread(() -> {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         GatewayServer.connect(address).setSynchronizationOffset(
@@ -302,13 +302,13 @@ public abstract class IoTServerImpl implements IoTServer {
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
 
         // Send synchronization offset to DB Server
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT -> !getIoT().equals(ioT))
                 .filter(ioT -> ioT.getIoTType() == IoTType.DB)
-                .forEach(ioT -> {
+                .forEach(ioT -> new Thread(() -> {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DbServer.connect(address).setSynchronizationOffset(
@@ -317,13 +317,13 @@ public abstract class IoTServerImpl implements IoTServer {
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
 
         // Send synchronization offset to Sensor Servers
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT -> !getIoT().equals(ioT))
                 .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
-                .forEach(ioT -> {
+                .forEach(ioT -> new Thread(() -> {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         SensorServer.connect(address).setSynchronizationOffset(
@@ -332,13 +332,13 @@ public abstract class IoTServerImpl implements IoTServer {
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
 
         // Send synchronization offset to Device Servers
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT -> !getIoT().equals(ioT))
                 .filter(ioT -> ioT.getIoTType() == IoTType.DEVICE)
-                .forEach(ioT -> {
+                .forEach(ioT -> new Thread(() -> {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DeviceServer.connect(address).setSynchronizationOffset(
@@ -347,7 +347,7 @@ public abstract class IoTServerImpl implements IoTServer {
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
     }
 
     /**

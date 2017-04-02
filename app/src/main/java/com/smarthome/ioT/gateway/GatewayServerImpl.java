@@ -92,13 +92,14 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     private void queryStates() {
         System.out.println("Querying the current state of all Sensors and Devices...");
 
-        getRegisteredIoTs().keySet().forEach(ioT -> {
-            try {
-                queryState(ioT);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        });
+        getRegisteredIoTs().keySet().forEach(ioT ->
+                new Thread(() -> {
+                    try {
+                        queryState(ioT);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }).start());
     }
 
     @Override
@@ -226,7 +227,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
                 .filter(ioT -> ioT.getIoTType() == IoTType.DEVICE)
                 .map(ioT -> ((Device) ioT))
                 .filter(device -> device.getDeviceType() == DeviceType.OUTLET)
-                .forEach(device -> setDeviceState(device, false));
+                .forEach(device -> new Thread(() -> setDeviceState(device, false)).start());
     }
 
     private void switchAllBulbs(final boolean status) {
@@ -236,7 +237,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
                 .filter(ioT -> ioT.getIoTType() == IoTType.DEVICE)
                 .map(ioT -> ((Device) ioT))
                 .filter(device -> device.getDeviceType() == DeviceType.BULB)
-                .forEach(device -> setDeviceState(device, status));
+                .forEach(device -> new Thread(() -> setDeviceState(device, status)).start());
     }
 
     private void waitForUserToStartLeaderElectionAndTimeSync() {
@@ -291,40 +292,40 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT1 -> ioT1.getIoTType() == IoTType.DB)
                 .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> {
+                .forEach(address -> new Thread(() -> {
                     try {
                         DbServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
                                 getLogicalTime());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
 
         // Send to all Sensors
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT1 -> ioT1.getIoTType() == IoTType.SENSOR)
                 .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> {
+                .forEach(address -> new Thread(() -> {
                     try {
                         SensorServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
                                 getLogicalTime());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
 
         // Send to all Devices
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT1 -> ioT1.getIoTType() == IoTType.DEVICE)
                 .map(ioT1 -> getRegisteredIoTs().get(ioT1))
-                .forEach(address -> {
+                .forEach(address -> new Thread(() -> {
                     try {
                         DeviceServer.connect(address).setRegisteredIoTs(getRegisteredIoTs(),
                                 getLogicalTime());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
     }
 
     private GatewayConfig getGatewayConfig() {
@@ -368,12 +369,12 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
                 .map(ioT -> ((Sensor) ioT))
                 .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
                 .map(sensor -> getRegisteredIoTs().get(sensor))
-                .forEach(address -> {
+                .forEach(address -> new Thread(() -> {
                     try {
                         SensorServer.connect(address).setPresenceServerActivated(false);
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
     }
 }

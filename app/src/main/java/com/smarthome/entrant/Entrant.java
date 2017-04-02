@@ -61,14 +61,14 @@ public class Entrant {
                 .map(ioT -> ((Sensor) ioT))
                 .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
                 .map(sensor -> getRegisteredIoTs().get(sensor))
-                .forEach(address -> {
+                .forEach(address -> new Thread(() -> {
                     try {
                         SensorServer.connect(address)
                                 .setPresenceServerActivated(getEntrantConfig().isAuthorized());
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
     }
 
     private void performActions() {
@@ -114,13 +114,13 @@ public class Entrant {
                 .map(ioT -> ((Sensor) ioT))
                 .filter(sensor -> sensor.getSensorType() == SensorType.DOOR)
                 .map(doorSensor -> getRegisteredIoTs().get(doorSensor))
-                .forEach(address -> {
+                .forEach(address -> new Thread(() -> {
                     try {
                         SensorServer.connect(address).openOrCloseDoor(opened, 0);
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
     }
 
     private void triggerMotionSensors() {
@@ -129,13 +129,13 @@ public class Entrant {
                 .map(ioT -> ((Sensor) ioT))
                 .filter(sensor -> sensor.getSensorType() == SensorType.MOTION)
                 .map(motionSensor -> getRegisteredIoTs().get(motionSensor))
-                .forEach(address -> {
+                .forEach(address -> new Thread(() -> {
                     try {
                         SensorServer.connect(address).triggerMotionSensor();
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
-                });
+                }).start());
     }
 
     /**
