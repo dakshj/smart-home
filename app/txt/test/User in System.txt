@@ -261,14 +261,14 @@ Closing the door.
 0,652e5a87-00fb-4c08-9703-df17f75dde7b,1,null,0,1491171194315,18,BULB switched off.
 0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171199726,12,OUTLET switched on.
 0,652e5a87-00fb-4c08-9703-df17f75dde7b,1,null,0,1491171200944,19,BULB switched on.
-0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171202389,13,Motion detected.
-0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171203663,13,OUTLET switched off.
+0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171202389,15,Motion detected.
+0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171203663,19,OUTLET switched off.
 0,652e5a87-00fb-4c08-9703-df17f75dde7b,1,null,0,1491171205066,20,BULB switched off.
-0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171207686,14,OUTLET switched on.
-0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171210335,15,OUTLET switched off.
+0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171207686,21,OUTLET switched on.
+0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171210335,22,OUTLET switched off.
 0,652e5a87-00fb-4c08-9703-df17f75dde7b,1,null,0,1491171211097,21,BULB switched on.
-0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171212306,14,Motion detected.
-0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171214354,33,OUTLET switched on.
+0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171212306,21,Motion detected.
+0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171214354,23,OUTLET switched on.
 0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171215853,33,Motion detected.
 0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171218111,34,OUTLET switched off.
 0,652e5a87-00fb-4c08-9703-df17f75dde7b,1,null,0,1491171219422,33,BULB switched off.
@@ -280,10 +280,10 @@ Closing the door.
 0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171235851,37,OUTLET switched on.
 0,d4fd46cc-aeb6-44cc-8f4c-9b5fde33895f,1,null,1,1491171239754,38,OUTLET switched off.
 0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171240778,36,Motion detected.
-0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171241670,37,Motion detected.
+0,d1ff63b4-34b9-46fa-b973-783cdc7bd8e9,0,1,null,1491171241670,41,Motion detected.
 0,ef7b89bc-0ec4-48ad-8885-3cc9b15601ee,0,2,null,1491171242474,33,Door opened.
 1,null,null,null,null,1491171242491,47,User exited the Smart Home.
 0,652e5a87-00fb-4c08-9703-df17f75dde7b,1,null,0,1491171242501,49,BULB switched off.
-0,ef7b89bc-0ec4-48ad-8885-3cc9b15601ee,0,2,null,1491171242984,34,Door closed.
+0,ef7b89bc-0ec4-48ad-8885-3cc9b15601ee,0,2,null,1491171242984,42,Door closed.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Log File END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

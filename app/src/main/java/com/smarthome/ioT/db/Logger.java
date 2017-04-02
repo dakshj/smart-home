@@ -5,15 +5,18 @@ import com.smarthome.model.Log;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 
 class Logger {
 
-    private static final String LOG_FILE_NAME = "Smart Home Logs";
+    private static final String LOG_FILE_NAME = "Smart Home Log";
+    private static final String LOG_FOLDER_NAME = LOG_FILE_NAME + "s";
 
+    private final Path logPath;
     private final File logFile;
 
     /**
@@ -23,18 +26,26 @@ class Logger {
      * @param currentTime The timestamp with which to create a new log file
      */
     Logger(final long currentTime) {
-        final URL resource = ClassLoader.getSystemClassLoader().getResource(".");
-        if (resource == null) {
-            throw new LogFileCreationFailedException("{failed to fetch folder path}");
-        }
+        logPath = Paths.get(System.getProperty("user.home"), LOG_FOLDER_NAME);
 
-        final File jarDir = new File(resource.getPath());
-        logFile = new File(jarDir, LOG_FILE_NAME + " - " + currentTime + ".txt");
+        logFile = new File(logPath.toFile(), LOG_FILE_NAME + " - " + currentTime + ".txt");
 
-        getLogFile();
+        initializeLogFile();
     }
 
-    private File getLogFile() {
+    private void initializeLogPath() {
+        if (!Files.exists(logPath)) {
+            try {
+                Files.createDirectories(logPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void initializeLogFile() {
+        initializeLogPath();
+
         if (!logFile.exists()) {
             try {
                 if (!logFile.createNewFile()) {
@@ -44,7 +55,10 @@ class Logger {
                 e.printStackTrace();
             }
         }
+    }
 
+    private File getLogFile() {
+        initializeLogFile();
         return logFile;
     }
 
