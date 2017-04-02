@@ -76,11 +76,33 @@ public interface DbServer extends IoTServer {
     void deviceToggled(final Device device, final long chronologicalTime,
             final long logicalTime) throws RemoteException;
 
+    /**
+     * Returns a limited-size list of the latest inserted {@link Log}s.
+     *
+     * @return A limited-size list of the latest inserted {@link Log}s
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
     LimitedSizeArrayList<Log> getYoungestLogsList() throws RemoteException;
 
+    /**
+     * Logs the inferred log of when an Intruder entered the Smart Home.
+     *
+     * @param chronologicalTime The timestamp of when the Intruder entered the Smart Home
+     * @param logicalTime       The logical time of when the Intruder entered the Smart Home
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
     void intruderEntered(final long chronologicalTime, final long logicalTime)
             throws RemoteException;
 
-    void userEntered(final boolean atHome, final long synchronizedTime, final long logicalTime)
+    /**
+     * Logs the inferred log of when a User entered the Smart Home.
+     *
+     * @param atHome            {@code true} if the User entered the Smart Home;
+     *                          {@code false} otherwise
+     * @param chronologicalTime The timestamp of when the User entered the Smart Home
+     * @param logicalTime       The logical time of when the User entered the Smart Home
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void userEntered(final boolean atHome, final long chronologicalTime, final long logicalTime)
             throws RemoteException;
 }
