@@ -103,10 +103,6 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         doorSensor.setData(opened);
 
         queryState(getLogicalTime());
-
-        if (!isRemotePresenceSensorActivated()) {
-            raiseRemoteAlarm();
-        }
     }
 
     @Override

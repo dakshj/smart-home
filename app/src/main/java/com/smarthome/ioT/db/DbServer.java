@@ -3,9 +3,11 @@ package com.smarthome.ioT.db;
 import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
+import com.smarthome.model.Log;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.TemperatureSensor;
+import com.smarthome.util.LimitedSizeArrayList;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -74,4 +76,12 @@ public interface DbServer extends IoTServer {
      */
     void deviceToggled(final Device device, final long chronologicalTime,
             final long logicalTime) throws RemoteException;
+
+    LimitedSizeArrayList<Log> getYoungestLogsList() throws RemoteException;
+
+    void intruderEntered(final long chronologicalTime, final long logicalTime)
+            throws RemoteException;
+
+    void userEntered(final boolean atHome, final long synchronizedTime, final long logicalTime)
+            throws RemoteException;
 }

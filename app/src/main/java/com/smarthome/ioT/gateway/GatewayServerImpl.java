@@ -10,11 +10,13 @@ import com.smarthome.ioT.sensor.SensorServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
+import com.smarthome.model.Log;
 import com.smarthome.model.config.GatewayConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
+import com.smarthome.util.LimitedSizeArrayList;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -27,6 +29,8 @@ import java.util.UUID;
 public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     private static final long TIME_RESYNC_DELAY = 30 * 1000;
+
+    private boolean alreadyRaisedAlarm;
 
     public GatewayServerImpl(final GatewayConfig gatewayConfig) throws RemoteException {
         super(gatewayConfig, false);
@@ -127,14 +131,38 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
                     case MOTION:
                         final MotionSensor motionSensor = ((MotionSensor) sensor);
                         dbServer.motionDetected(motionSensor, time, senderLogicalTime);
-                        break;
+
+                    {
+                        final LimitedSizeArrayList<Log> youngestLogsList =
+                                dbServer.getYoungestLogsList();
+
+                        if (youngestLogsList.getEldest().getIoTType() != null &&
+                                youngestLogsList.getEldest().getIoTType() == IoTType.SENSOR &&
+                                youngestLogsList.getEldest().getSensorType() != null &&
+                                youngestLogsList.getEldest().getSensorType() == SensorType.DOOR) {
+                            someoneEnteredHome(true);
+                        }
+                    }
+                    break;
 
                     case DOOR:
                         final DoorSensor doorSensor = ((DoorSensor) sensor);
                         System.out.println("State of " + doorSensor + " : "
                                 + (doorSensor.getData() ? "Open" : "Closed") + ".");
                         dbServer.doorToggled(doorSensor, time, senderLogicalTime);
-                        break;
+
+                    {
+                        final LimitedSizeArrayList<Log> youngestLogsList =
+                                dbServer.getYoungestLogsList();
+
+                        if (youngestLogsList.getEldest().getIoTType() != null &&
+                                youngestLogsList.getEldest().getIoTType() == IoTType.SENSOR &&
+                                youngestLogsList.getEldest().getSensorType() != null &&
+                                youngestLogsList.getEldest().getSensorType() == SensorType.MOTION) {
+                            someoneEnteredHome(false);
+                        }
+                    }
+                    break;
                 }
                 break;
 
@@ -174,20 +202,31 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     public void raiseAlarm(final long senderLogicalTime) throws RemoteException {
         incrementLogicalTime(senderLogicalTime);
 
+        if (alreadyRaisedAlarm) {
+            return;
+        }
+
+        alreadyRaisedAlarm = true;
+
         System.out.println("An intruder has entered the Smart Home!");
-        switchAllOutlets(false);
+        switchOffAllOutlets();
         switchAllBulbs(true);
         System.out.println("Contacting 911 and the Home Owner!");
     }
 
-    private void switchAllOutlets(final boolean status) {
-        System.out.println("Switching " + (status ? "on" : "off") + " all outlets!");
+    @Override
+    public void entrantExecutionFinished() throws RemoteException {
+        alreadyRaisedAlarm = false;
+    }
+
+    private void switchOffAllOutlets() {
+        System.out.println("Switching off all outlets!");
 
         getRegisteredIoTs().keySet().stream()
                 .filter(ioT -> ioT.getIoTType() == IoTType.DEVICE)
                 .map(ioT -> ((Device) ioT))
                 .filter(device -> device.getDeviceType() == DeviceType.OUTLET)
-                .forEach(device -> setDeviceState(device, status));
+                .forEach(device -> setDeviceState(device, false));
     }
 
     private void switchAllBulbs(final boolean status) {
@@ -201,8 +240,8 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     private void waitForUserToStartLeaderElectionAndTimeSync() {
-        System.out.println("\nPlease press Enter after all IoT servers are running.\n" +
-                "Pressing Enter will begin the Leader Election and Time Synchronization jobs.");
+        System.out.println("\nPlease input any character after all IoT servers are running.\n" +
+                "This will begin the Leader Election and Time Synchronization jobs.");
         new Scanner(System.in).next();
 
         periodicallyElectLeaderAndSynchronizeClocks();
@@ -218,9 +257,9 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                System.out.println("\n~~~~~~Resynchronizing Times~~~~~~");
+                System.out.println("\n~~~~~~Time Resynchronization Started~~~~~~");
                 periodicallyElectLeaderAndSynchronizeClocks();
-                System.out.println("\n~~~~~~Resynchronization complete~~~~~~\n");
+                System.out.println("\n~~~~~~Time Resynchronization Complete~~~~~~\n");
             }
         }, TIME_RESYNC_DELAY);
     }
@@ -292,28 +331,49 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
         return ((GatewayConfig) getServerConfig());
     }
 
-    private void userAtHome(final boolean atHome) {
-        System.out.println("Switched to " + (atHome ? "HOME" : "AWAY") + " mode.");
+    private void someoneEnteredHome(final boolean atHome) {
+        if (!isRemotePresenceSensorActivated()) {
+            try {
+                DbServer.connect(getGatewayConfig().getDbAddress())
+                        .intruderEntered(getSynchronizedTime(), getLogicalTime());
+            } catch (RemoteException | NotBoundException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
 
-        queryStates();
+        try {
+            DbServer.connect(getGatewayConfig().getDbAddress())
+                    .userEntered(atHome, getSynchronizedTime(), getLogicalTime());
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("User " + (atHome ? "entered" : "exited") + " the Smart Home.");
+
+        System.out.println("Switched to " + (atHome ? "HOME" : "AWAY") + " mode.");
 
         switchAllBulbs(atHome);
 
         if (!atHome) {
-            switchAllOutlets(false);
+            switchOffAllOutlets();
 
-            getRegisteredIoTs().keySet().stream()
-                    .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
-                    .map(ioT -> ((Sensor) ioT))
-                    .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
-                    .map(sensor -> getRegisteredIoTs().get(sensor))
-                    .forEach(address -> {
-                        try {
-                            SensorServer.connect(address).setPresenceServerActivated(false);
-                        } catch (RemoteException | NotBoundException e) {
-                            e.printStackTrace();
-                        }
-                    });
+            resetAllPresenceSensorsToInactive();
         }
+    }
+
+    private void resetAllPresenceSensorsToInactive() {
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                .map(ioT -> ((Sensor) ioT))
+                .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
+                .map(sensor -> getRegisteredIoTs().get(sensor))
+                .forEach(address -> {
+                    try {
+                        SensorServer.connect(address).setPresenceServerActivated(false);
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 }

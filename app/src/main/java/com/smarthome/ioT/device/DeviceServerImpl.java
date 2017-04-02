@@ -52,13 +52,10 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
         incrementLogicalTime(senderLogicalTime);
 
         getDevice().setState(state);
-        System.out.println(this + " switched " + (getDevice().getState() ? "on" : "off") + ".");
+        System.out.println(getDevice() + " switched "
+                + (getDevice().getState() ? "on" : "off") + ".");
 
         queryState(0);
-
-        if (!isRemotePresenceSensorActivated()) {
-            raiseRemoteAlarm();
-        }
     }
 
     @Override

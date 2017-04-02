@@ -94,7 +94,13 @@ public class Entrant {
             System.out.println("Closing the door.");
             setDoorSensors(false);
         } else {
-            System.out.println("Cannot open the door because the Entrant is an Intruder!");
+            System.out.println("Cannot use the door because the Entrant is an Intruder!");
+        }
+
+        try {
+            GatewayServer.connect(getEntrantConfig().getGatewayAddress()).entrantExecutionFinished();
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
         }
     }
 
@@ -152,17 +158,17 @@ public class Entrant {
 
                     if (getEntrantConfig().isAuthorized()) {
                         System.out.println("Toggling the " + device + ".");
+
+                        final Address address = getRegisteredIoTs().get(device);
+
+                        try {
+                            DeviceServer.connect(address).toggleState(0);
+                        } catch (RemoteException | NotBoundException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         System.out.println("Cannot toggle the " + device + " because" +
                                 " the Entrant is an Intruder!");
-                    }
-
-                    final Address address = getRegisteredIoTs().get(device);
-
-                    try {
-                        DeviceServer.connect(address).toggleState(0);
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
                     }
                 });
 

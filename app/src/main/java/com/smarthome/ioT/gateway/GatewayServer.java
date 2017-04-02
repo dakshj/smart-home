@@ -61,4 +61,11 @@ public interface GatewayServer extends IoTServer {
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
     void raiseAlarm(final long senderLogicalTime) throws RemoteException;
+
+    /**
+     * Notifies that the Entrant has finished its execution.
+     *
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void entrantExecutionFinished() throws RemoteException;
 }
