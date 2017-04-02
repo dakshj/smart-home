@@ -142,8 +142,9 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     @Override
     public void raiseAlarm() throws RemoteException {
+        System.out.println("An intruder has entered the Smart Home!");
+
         // TODO Perform necessary actions which should happen after an alarm has been raised
-        System.out.println("An intruder has entered the house!!");
     }
 
     private void waitForUserToStartLeaderElectionAndTimeSync() {
@@ -180,7 +181,6 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     private void electLeaderAndSynchronizeClocks() {
         System.out.println("\nElecting a Leader for Time Synchronization...");
         if (isLeader()) {
-            System.out.println("I am the Leader.");
             synchronizeTime();
         } else {
             System.out.println("Broadcasting Map of Registered IoTs, to all IoTs...");
@@ -236,7 +236,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
     }
 
     private GatewayConfig getGatewayConfig() {
-        return ((GatewayConfig) getConfig());
+        return ((GatewayConfig) getServerConfig());
     }
 
     private boolean isSecurityActivated() {

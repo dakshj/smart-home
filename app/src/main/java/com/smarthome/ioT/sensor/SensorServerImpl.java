@@ -13,6 +13,7 @@ import com.smarthome.model.sensor.PresenceSensor;
 import com.smarthome.model.sensor.Sensor;
 import com.smarthome.model.sensor.TemperatureSensor;
 
+import java.math.BigDecimal;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Timer;
@@ -56,46 +57,9 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         return null;
     }
 
-    private SensorConfig getSensorConfig() {
-        return ((SensorConfig) getConfig());
-    }
-
-    private Sensor getSensor() {
-        return ((Sensor) getIoT());
-    }
-
     @Override
     protected String getName() {
         return NAME;
-    }
-
-    /**
-     * Generates a random Temperature value (in °F).
-     * <p>
-     * Next, waits for a random duration.
-     * <p>
-     * Finally, repeats the above.
-     */
-    private void periodicallyGenerateTemperatureValues() {
-        final long delayForNextValueGeneration = ThreadLocalRandom.current().nextLong(
-                TemperatureSensor.VALUE_GENERATION_GAP_MIN,
-                TemperatureSensor.VALUE_GENERATION_GAP_MAX
-        );
-
-        final double nextTemp = ThreadLocalRandom.current().nextDouble(
-                TemperatureSensor.VALUE_MIN,
-                TemperatureSensor.VALUE_MAX
-        );
-
-        //noinspection RedundantCast
-        ((TemperatureSensor) getSensor()).setData(nextTemp);
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                periodicallyGenerateTemperatureValues();
-            }
-        }, delayForNextValueGeneration);
     }
 
     @Override
@@ -111,10 +75,12 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
     }
 
     @Override
-    public void triggerMotionSensor() throws RemoteException, NotBoundException {
+    public void triggerMotionSensor() throws RemoteException {
         if (getSensor().getSensorType() != SensorType.MOTION) {
             return;
         }
+
+        System.out.println("Detected motion.");
 
         queryState(getLogicalTime());
 
@@ -123,8 +89,87 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         }
     }
 
-    private void raiseAlarm() throws RemoteException, NotBoundException {
-        GatewayServer.connect(sensorConfig.getGatewayAddress()).raiseAlarm();
+    @Override
+    public void openOrCloseDoor(final boolean opened) throws RemoteException {
+        if (getSensor().getSensorType() != SensorType.DOOR) {
+            return;
+        }
+
+        System.out.println("Door " + (opened ? "opened" : "closed") + ".");
+
+        final DoorSensor doorSensor = ((DoorSensor) getSensor());
+        doorSensor.setData(opened);
+
+        queryState(getLogicalTime());
+
+        if (!isRemotePresenceSensorActivated()) {
+            raiseAlarm();
+        }
+    }
+
+    @Override
+    public void setPresenceServerActivated(final boolean entrantAuthorized) throws RemoteException {
+        if (getSensor().getSensorType() != SensorType.PRESENCE) {
+            return;
+        }
+
+        PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
+        presenceSensor.setData(entrantAuthorized);
+    }
+
+    @Override
+    public boolean isPresenceSensorActivated() throws RemoteException {
+        if (getSensor().getSensorType() != SensorType.PRESENCE) {
+            return false;
+        }
+
+        PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
+        return presenceSensor.getData();
+    }
+
+    /**
+     * Generates a random Temperature value (in °F).
+     * <p>
+     * Next, waits for a random duration.
+     * <p>
+     * Finally, repeats the above.
+     */
+    private void periodicallyGenerateTemperatureValues() {
+        final long delayForNextValueGeneration = ThreadLocalRandom.current().nextLong(
+                TemperatureSensor.VALUE_GENERATION_GAP_MIN,
+                TemperatureSensor.VALUE_GENERATION_GAP_MAX
+        );
+
+        double nextTemp = ThreadLocalRandom.current().nextDouble(
+                TemperatureSensor.VALUE_MIN,
+                TemperatureSensor.VALUE_MAX
+        );
+
+        nextTemp = new BigDecimal(nextTemp)
+                .setScale(2, BigDecimal.ROUND_HALF_EVEN).doubleValue();
+
+        System.out.println("New Temperature: " + nextTemp + "°F.");
+
+        //noinspection RedundantCast
+        ((TemperatureSensor) getSensor()).setData(nextTemp);
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                periodicallyGenerateTemperatureValues();
+            }
+        }, delayForNextValueGeneration);
+    }
+
+    private void raiseAlarm() {
+        System.out.println("Raising Alarm!");
+        System.out.println("Informing Gateway...");
+
+        try {
+            GatewayServer.connect(sensorConfig.getGatewayAddress()).raiseAlarm();
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -152,39 +197,11 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         return authorizedUser[0];
     }
 
-    @Override
-    public void toggleDoorSensor() throws RemoteException, NotBoundException {
-        if (getSensor().getSensorType() != SensorType.DOOR) {
-            return;
-        }
-
-        final DoorSensor doorSensor = ((DoorSensor) getSensor());
-        doorSensor.setData(doorSensor.getData());
-
-        queryState(getLogicalTime());
-
-        if (!isRemotePresenceSensorActivated()) {
-            raiseAlarm();
-        }
+    private SensorConfig getSensorConfig() {
+        return ((SensorConfig) getServerConfig());
     }
 
-    @Override
-    public void setPresenceServerActivated(final boolean entrantAuthorized) throws RemoteException {
-        if (getSensor().getSensorType() != SensorType.PRESENCE) {
-            return;
-        }
-
-        PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
-        presenceSensor.setActivated(entrantAuthorized);
-    }
-
-    @Override
-    public boolean isPresenceSensorActivated() {
-        if (getSensor().getSensorType() != SensorType.PRESENCE) {
-            return false;
-        }
-
-        PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
-        return presenceSensor.isActivated();
+    private Sensor getSensor() {
+        return ((Sensor) getIoT());
     }
 }

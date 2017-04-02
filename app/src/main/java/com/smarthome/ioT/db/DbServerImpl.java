@@ -6,7 +6,7 @@ import com.smarthome.ioT.IoTServerImpl;
 import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
 import com.smarthome.model.Log;
-import com.smarthome.model.config.Config;
+import com.smarthome.model.config.ServerConfig;
 import com.smarthome.model.sensor.DoorSensor;
 import com.smarthome.model.sensor.MotionSensor;
 import com.smarthome.model.sensor.TemperatureSensor;
@@ -18,8 +18,8 @@ public class DbServerImpl extends IoTServerImpl implements DbServer {
 
     private final Logger logger;
 
-    public DbServerImpl(final Config config) throws RemoteException {
-        super(config, true);
+    public DbServerImpl(final ServerConfig serverConfig) throws RemoteException {
+        super(serverConfig, true);
         logger = new Logger();
     }
 

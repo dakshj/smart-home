@@ -4,7 +4,7 @@ import com.smarthome.model.Address;
 
 import java.io.Serializable;
 
-public class GatewayConfig extends Config implements Serializable {
+public class GatewayConfig extends ServerConfig implements Serializable {
 
     private Address dbAddress;
 

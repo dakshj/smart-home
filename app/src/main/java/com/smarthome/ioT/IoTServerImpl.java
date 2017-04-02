@@ -7,7 +7,7 @@ import com.smarthome.ioT.gateway.GatewayServer;
 import com.smarthome.ioT.sensor.SensorServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
-import com.smarthome.model.config.Config;
+import com.smarthome.model.config.ServerConfig;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public abstract class IoTServerImpl implements IoTServer {
 
-    private final Config config;
+    private final ServerConfig serverConfig;
     private final IoT ioT;
     private final Map<IoT, Long> offsetMap;
     private long logicalTime;
@@ -35,33 +35,33 @@ public abstract class IoTServerImpl implements IoTServer {
      * <p>
      * Additionally, registers itself remotely to the Gateway, if itself is not a Gateway.
      *
-     * @param config                    The config used to initialize its IoT server
+     * @param serverConfig              The config used to initialize its IoT server
      * @param registerRemotelyToGateway If {@code true} then register remotely to Gateway;
      *                                  else register locally to its contained
      *                                  {@link #registeredIoTs}.
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    protected IoTServerImpl(final Config config, final boolean registerRemotelyToGateway)
+    protected IoTServerImpl(final ServerConfig serverConfig, final boolean registerRemotelyToGateway)
             throws RemoteException {
-        this.config = config;
+        this.serverConfig = serverConfig;
         ioT = createIoT();
         offsetMap = new HashMap<>();
         setLogicalTime(0);
         registeredIoTs = new HashMap<>();
 
-        startServer(config.getAddress().getPortNo());
+        startServer(serverConfig.getAddress().getPortNo());
 
         if (registerRemotelyToGateway) {
             System.out.println("Registering to Gateway...");
             try {
-                GatewayServer.connect(config.getGatewayAddress()).register(ioT, config.getAddress(),
+                GatewayServer.connect(serverConfig.getGatewayAddress()).register(ioT, serverConfig.getAddress(),
                         getLogicalTime());
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
             }
             System.out.println("Successfully registered.");
         } else {
-            getRegisteredIoTs().put(getIoT(), getConfig().getAddress());
+            getRegisteredIoTs().put(getIoT(), getServerConfig().getAddress());
         }
     }
 
@@ -83,8 +83,8 @@ public abstract class IoTServerImpl implements IoTServer {
 
     protected abstract String getName();
 
-    protected Config getConfig() {
-        return config;
+    protected ServerConfig getServerConfig() {
+        return serverConfig;
     }
 
     protected IoT getIoT() {
@@ -131,7 +131,7 @@ public abstract class IoTServerImpl implements IoTServer {
 
     @Override
     public long getCurrentTime() throws RemoteException {
-        return System.currentTimeMillis() + getConfig().getRandomTimeOffset();
+        return System.currentTimeMillis() + getServerConfig().getRandomTimeOffset();
     }
 
     protected Map<IoT, Address> getRegisteredIoTs() {
@@ -147,7 +147,6 @@ public abstract class IoTServerImpl implements IoTServer {
 
         this.registeredIoTs = registeredIoTs;
         if (isLeader()) {
-            System.out.println("I am the Leader.");
             synchronizeTime();
         }
     }
@@ -165,7 +164,13 @@ public abstract class IoTServerImpl implements IoTServer {
 
         uuidList.sort(null);
 
-        return getIoT().getId().equals(uuidList.get(uuidList.size() - 1));
+        final boolean leader = getIoT().getId().equals(uuidList.get(uuidList.size() - 1));
+
+        if (leader) {
+            System.out.println("I am the Leader.");
+        }
+
+        return leader;
     }
 
     /**

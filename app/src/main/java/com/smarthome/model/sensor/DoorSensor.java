@@ -10,6 +10,7 @@ public class DoorSensor extends Sensor<Boolean> implements Serializable {
 
     public DoorSensor(final UUID id, final IoTType ioTType, final SensorType sensorType) {
         super(id, ioTType, sensorType);
+        setData(false);
     }
 
     /**

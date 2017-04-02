@@ -4,7 +4,7 @@ import com.smarthome.enums.SensorType;
 
 import java.io.Serializable;
 
-public class SensorConfig extends Config implements Serializable {
+public class SensorConfig extends ServerConfig implements Serializable {
 
     private SensorType sensorType;
 

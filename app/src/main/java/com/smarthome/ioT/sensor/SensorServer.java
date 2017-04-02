@@ -39,12 +39,11 @@ public interface SensorServer extends IoTServer {
      * <p>
      * Additionally, if the Entrant is not authorized, raises the security system's alarm.
      *
-     * @throws RemoteException   Thrown when a Java RMI exception occurs
-     * @throws NotBoundException Thrown when the remote binding does not exist in the {@link Registry}
+     * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void triggerMotionSensor() throws RemoteException, NotBoundException;
+    void triggerMotionSensor() throws RemoteException;
 
-    void toggleDoorSensor() throws RemoteException, NotBoundException;
+    void openOrCloseDoor(final boolean opened) throws RemoteException;
 
     /**
      * Activates the Presence Sensor, which marks an Entrant as an authorized user.

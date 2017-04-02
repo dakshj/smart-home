@@ -5,10 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.smarthome.enums.DeviceType;
-import com.smarthome.enums.EntrantType;
 import com.smarthome.enums.SensorType;
 import com.smarthome.gson.DeviceTypeDeserializer;
-import com.smarthome.gson.EntrantTypeDeserializer;
 import com.smarthome.gson.SensorTypeDeserializer;
 import com.smarthome.model.config.Config;
 
@@ -57,7 +55,6 @@ public class ConfigReader<T extends Config> {
     private void initializeGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DeviceType.class, new DeviceTypeDeserializer());
-        gsonBuilder.registerTypeAdapter(EntrantType.class, new EntrantTypeDeserializer());
         gsonBuilder.registerTypeAdapter(SensorType.class, new SensorTypeDeserializer());
         setGson(gsonBuilder.create());
     }

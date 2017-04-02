@@ -23,7 +23,7 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
     }
 
     private DeviceConfig getDeviceConfig() {
-        return ((DeviceConfig) getConfig());
+        return ((DeviceConfig) getServerConfig());
     }
 
     private Device getDevice() {
@@ -52,6 +52,8 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
         incrementLogicalTime(senderLogicalTime);
 
         getDevice().setState(state);
+        System.out.println(this + " switched " + (getDevice().getState() ? "on" : "off") + ".");
+
         queryState(0);
     }
 

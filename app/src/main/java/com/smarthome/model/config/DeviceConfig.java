@@ -4,7 +4,7 @@ import com.smarthome.enums.DeviceType;
 
 import java.io.Serializable;
 
-public class DeviceConfig extends Config implements Serializable {
+public class DeviceConfig extends ServerConfig implements Serializable {
 
     private DeviceType deviceType;
 
