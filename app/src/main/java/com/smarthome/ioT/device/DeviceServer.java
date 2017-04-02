@@ -46,8 +46,7 @@ public interface DeviceServer extends IoTServer {
     /**
      * Toggles the state of the IoT Device
      *
-     * @param senderLogicalTime The logical time of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void toggleState(final long senderLogicalTime) throws RemoteException;
+    void toggleState() throws RemoteException;
 }

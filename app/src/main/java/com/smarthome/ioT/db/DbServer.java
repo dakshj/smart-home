@@ -41,8 +41,7 @@ public interface DbServer extends IoTServer {
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
     void temperatureChanged(final TemperatureSensor temperatureSensor, final long chronologicalTime,
-            final long logicalTime)
-            throws RemoteException;
+            final long logicalTime) throws RemoteException;
 
     /**
      * Logs a detected motion, as provided by the motion sensor.

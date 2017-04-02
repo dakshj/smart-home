@@ -44,12 +44,11 @@ public interface SensorServer extends IoTServer {
     void triggerMotionSensor() throws RemoteException;
 
     /**
-     * @param opened            {@code true} if the door needs to be opened;
-     *                          {@code false} otherwise
-     * @param senderLogicalTime The logical time of the calling IoT server
+     * @param opened {@code true} if the door needs to be opened;
+     *               {@code false} otherwise
      * @throws RemoteException Thrown when a Java RMI exception occurs
      */
-    void openOrCloseDoor(final boolean opened, final long senderLogicalTime) throws RemoteException;
+    void openOrCloseDoor(final boolean opened) throws RemoteException;
 
     /**
      * Activates the Presence Sensor, which marks an Entrant as an authorized user.

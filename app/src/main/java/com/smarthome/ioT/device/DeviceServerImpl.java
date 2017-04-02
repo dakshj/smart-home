@@ -49,8 +49,6 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
 
     @Override
     public void setState(final boolean state, final long senderLogicalTime) throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
-
         if (getDevice().getState() == state) {
             return;
         }
@@ -59,13 +57,11 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
         System.out.println(getDevice() + " switched "
                 + (getDevice().getState() ? "on" : "off") + ".");
 
-        queryState(0);
+        queryState(senderLogicalTime);
     }
 
     @Override
-    public void toggleState(final long senderLogicalTime) throws RemoteException {
-        incrementLogicalTime(senderLogicalTime);
-
+    public void toggleState() throws RemoteException {
         getDevice().setState(!getDevice().getState());
         queryState(0);
     }

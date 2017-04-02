@@ -89,13 +89,10 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
     }
 
     @Override
-    public void openOrCloseDoor(final boolean opened, final long senderLogicalTime)
-            throws RemoteException {
+    public void openOrCloseDoor(final boolean opened) throws RemoteException {
         if (getSensor().getSensorType() != SensorType.DOOR) {
             return;
         }
-
-        incrementLogicalTime(senderLogicalTime);
 
         System.out.println("Door " + (opened ? "opened" : "closed") + ".");
 
@@ -110,6 +107,8 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         if (getSensor().getSensorType() != SensorType.PRESENCE) {
             return;
         }
+
+        incrementLogicalTime(0);
 
         PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
         presenceSensor.setData(entrantAuthorized);

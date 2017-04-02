@@ -217,6 +217,7 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
     @Override
     public void entrantExecutionFinished() throws RemoteException {
+        incrementLogicalTime(0);
         alreadyRaisedAlarm = false;
     }
 

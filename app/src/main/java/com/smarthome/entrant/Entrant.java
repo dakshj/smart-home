@@ -116,7 +116,7 @@ public class Entrant {
                 .map(doorSensor -> getRegisteredIoTs().get(doorSensor))
                 .forEach(address -> new Thread(() -> {
                     try {
-                        SensorServer.connect(address).openOrCloseDoor(opened, 0);
+                        SensorServer.connect(address).openOrCloseDoor(opened);
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
@@ -162,7 +162,7 @@ public class Entrant {
                         final Address address = getRegisteredIoTs().get(device);
 
                         try {
-                            DeviceServer.connect(address).toggleState(0);
+                            DeviceServer.connect(address).toggleState();
                         } catch (RemoteException | NotBoundException e) {
                             e.printStackTrace();
                         }

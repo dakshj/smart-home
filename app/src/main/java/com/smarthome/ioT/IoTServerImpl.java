@@ -124,7 +124,10 @@ public abstract class IoTServerImpl implements IoTServer {
     }
 
     @Override
-    public void setSynchronizationOffset(final long synchronizationOffset) {
+    public void setSynchronizationOffset(final long synchronizationOffset,
+            final long senderLogicalTime) throws RemoteException {
+        incrementLogicalTime(senderLogicalTime);
+
         System.out.println("Received Time Synchronization offset of "
                 + synchronizationOffset + " ms.");
 
@@ -192,7 +195,11 @@ public abstract class IoTServerImpl implements IoTServer {
         final long[] offsetTotal = {0};
         getOffsetMap().values().forEach(offset -> offsetTotal[0] += offset);
 
-        sendSynchronizationOffsets(offsetTotal[0] / getOffsetMap().size());
+        try {
+            sendSynchronizationOffsets(offsetTotal[0] / getOffsetMap().size());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("\nTime Synchronization complete.");
     }
@@ -283,10 +290,10 @@ public abstract class IoTServerImpl implements IoTServer {
         return requestTime - remoteCurrentTime + (responseTime - requestTime) / 2;
     }
 
-    private void sendSynchronizationOffsets(final long offsetAverage) {
+    private void sendSynchronizationOffsets(final long offsetAverage) throws RemoteException {
         // Send synchronization offset to self
         setSynchronizationOffset(
-                getOffsetMap().get(getIoT()) - offsetAverage
+                getOffsetMap().get(getIoT()) - offsetAverage, getLogicalTime()
         );
 
         // Send synchronization offset to Gateway Server
@@ -297,7 +304,7 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         GatewayServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage
+                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
@@ -312,7 +319,7 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DbServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage
+                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
@@ -327,7 +334,7 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         SensorServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage
+                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
@@ -342,7 +349,7 @@ public abstract class IoTServerImpl implements IoTServer {
                     final Address address = getRegisteredIoTs().get(ioT);
                     try {
                         DeviceServer.connect(address).setSynchronizationOffset(
-                                getOffsetMap().get(ioT) - offsetAverage
+                                getOffsetMap().get(ioT) - offsetAverage, getLogicalTime()
                         );
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();

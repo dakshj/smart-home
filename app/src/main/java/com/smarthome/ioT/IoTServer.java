@@ -19,7 +19,16 @@ public interface IoTServer extends Remote {
     void setRegisteredIoTs(final Map<IoT, Address> registeredIoTs, final long senderLogicalTime)
             throws RemoteException;
 
-    void setSynchronizationOffset(final long synchronizationOffset) throws RemoteException;
+    /**
+     * Sets the synchronization offset of this IoT server, calculated using the
+     * <a href="https://en.wikipedia.org/wiki/Berkeley_algorithm">Berkeley algorithm</a>.
+     *
+     * @param synchronizationOffset The synchronization offset of the chronological clock
+     * @param senderLogicalTime     The logical time of the calling IoT server
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
+    void setSynchronizationOffset(final long synchronizationOffset, final long senderLogicalTime)
+            throws RemoteException;
 
     /**
      * Returns the current system time of this IoT server.

@@ -52,6 +52,12 @@ public interface GatewayServer extends IoTServer {
     void reportState(final IoT ioT, final long time, final long senderLogicalTime)
             throws RemoteException;
 
+    /**
+     * Returns the {@link Map} of registered IoTs to the calling IoT server.
+     *
+     * @return The {@link Map} of registered IoTs
+     * @throws RemoteException Thrown when a Java RMI exception occurs
+     */
     Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException;
 
     /**
