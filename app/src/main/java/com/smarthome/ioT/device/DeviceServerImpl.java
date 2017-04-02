@@ -55,6 +55,10 @@ public class DeviceServerImpl extends IoTServerImpl implements DeviceServer {
         System.out.println(this + " switched " + (getDevice().getState() ? "on" : "off") + ".");
 
         queryState(0);
+
+        if (!isRemotePresenceSensorActivated()) {
+            raiseRemoteAlarm();
+        }
     }
 
     @Override

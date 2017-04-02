@@ -12,23 +12,29 @@ import java.util.Collections;
 
 class Logger {
 
-    private static final String LOG_FILE_NAME = "Smart Home Logs.txt";
+    private static final String LOG_FILE_NAME = "Smart Home Logs";
 
     private final File logFile;
 
     /**
      * Initializes (and creates the file on disk, if necessary) a {@link File} object pointing to
      * {@value LOG_FILE_NAME}.
+     *
+     * @param currentTime The timestamp with which to create a new log file
      */
-    Logger() {
+    Logger(final long currentTime) {
         final URL resource = ClassLoader.getSystemClassLoader().getResource(".");
         if (resource == null) {
             throw new LogFileCreationFailedException("{failed to fetch folder path}");
         }
 
         final File jarDir = new File(resource.getPath());
-        logFile = new File(jarDir, LOG_FILE_NAME);
+        logFile = new File(jarDir, LOG_FILE_NAME + " - " + currentTime + ".txt");
 
+        getLogFile();
+    }
+
+    private File getLogFile() {
         if (!logFile.exists()) {
             try {
                 if (!logFile.createNewFile()) {
@@ -38,9 +44,7 @@ class Logger {
                 e.printStackTrace();
             }
         }
-    }
 
-    private File getLogFile() {
         return logFile;
     }
 

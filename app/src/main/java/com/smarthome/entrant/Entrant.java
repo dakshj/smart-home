@@ -42,11 +42,11 @@ public class Entrant {
                     .fetchRegisteredIoTs());
 
             System.out.println("Successfully fetched.");
-
-            setPresenceSensorActivationStatus();
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
+
+        setPresenceSensorActivationStatus();
 
         performActions();
     }
@@ -87,11 +87,15 @@ public class Entrant {
         System.out.println("Moving towards the door to leave the Smart Home.");
         triggerMotionSensors();
 
-        System.out.println("Opening the door.");
-        setDoorSensors(true);
+        if (getEntrantConfig().isAuthorized()) {
+            System.out.println("Opening the door.");
+            setDoorSensors(true);
 
-        System.out.println("Closing the door.");
-        setDoorSensors(false);
+            System.out.println("Closing the door.");
+            setDoorSensors(false);
+        } else {
+            System.out.println("Cannot open the door because the Entrant is an Intruder!");
+        }
     }
 
     /**
@@ -106,7 +110,7 @@ public class Entrant {
                 .map(doorSensor -> getRegisteredIoTs().get(doorSensor))
                 .forEach(address -> {
                     try {
-                        SensorServer.connect(address).openOrCloseDoor(opened);
+                        SensorServer.connect(address).openOrCloseDoor(opened, 0);
                     } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
@@ -133,7 +137,7 @@ public class Entrant {
      * <p>
      * Additionally, randomly trigger motion sensors with a 50% probability.
      * <p>
-     * Finally, randomly recursively calls self with a 70% probability.
+     * Finally, randomly recursively calls self with a 80% probability.
      */
     private void randomlyToggleDevicesAndTriggerMotionSensors() {
         getRegisteredIoTs().keySet().stream()
@@ -146,7 +150,12 @@ public class Entrant {
                 .forEach(device -> {
                     addRandomDelay();
 
-                    System.out.println("Toggling the " + device + ".");
+                    if (getEntrantConfig().isAuthorized()) {
+                        System.out.println("Toggling the " + device + ".");
+                    } else {
+                        System.out.println("Cannot toggle the " + device + " because" +
+                                " the Entrant is an Intruder!");
+                    }
 
                     final Address address = getRegisteredIoTs().get(device);
 
@@ -166,8 +175,8 @@ public class Entrant {
 
         addRandomDelay();
 
-        // Randomly recursively calls self with a 70% probability
-        if (ThreadLocalRandom.current().nextInt(1, 101) <= 70) {
+        // Randomly recursively calls self with a 80% probability
+        if (ThreadLocalRandom.current().nextInt(1, 101) <= 80) {
             randomlyToggleDevicesAndTriggerMotionSensors();
         }
     }

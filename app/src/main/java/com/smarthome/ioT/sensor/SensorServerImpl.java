@@ -4,7 +4,6 @@ import com.smarthome.enums.IoTType;
 import com.smarthome.enums.SensorType;
 import com.smarthome.ioT.IoTServerImpl;
 import com.smarthome.ioT.gateway.GatewayServer;
-import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
 import com.smarthome.model.config.SensorConfig;
 import com.smarthome.model.sensor.DoorSensor;
@@ -85,15 +84,18 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         queryState(getLogicalTime());
 
         if (!isRemotePresenceSensorActivated()) {
-            raiseAlarm();
+            raiseRemoteAlarm();
         }
     }
 
     @Override
-    public void openOrCloseDoor(final boolean opened) throws RemoteException {
+    public void openOrCloseDoor(final boolean opened, final long senderLogicalTime)
+            throws RemoteException {
         if (getSensor().getSensorType() != SensorType.DOOR) {
             return;
         }
+
+        incrementLogicalTime(senderLogicalTime);
 
         System.out.println("Door " + (opened ? "opened" : "closed") + ".");
 
@@ -103,7 +105,7 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
         queryState(getLogicalTime());
 
         if (!isRemotePresenceSensorActivated()) {
-            raiseAlarm();
+            raiseRemoteAlarm();
         }
     }
 
@@ -118,10 +120,12 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
     }
 
     @Override
-    public boolean isPresenceSensorActivated() throws RemoteException {
+    public boolean isPresenceSensorActivated(final long senderLogicalTime) throws RemoteException {
         if (getSensor().getSensorType() != SensorType.PRESENCE) {
             return false;
         }
+
+        incrementLogicalTime(senderLogicalTime);
 
         PresenceSensor presenceSensor = ((PresenceSensor) getSensor());
         return presenceSensor.getData();
@@ -159,42 +163,6 @@ public class SensorServerImpl extends IoTServerImpl implements SensorServer {
                 periodicallyGenerateTemperatureValues();
             }
         }, delayForNextValueGeneration);
-    }
-
-    private void raiseAlarm() {
-        System.out.println("Raising Alarm!");
-        System.out.println("Informing Gateway...");
-
-        try {
-            GatewayServer.connect(sensorConfig.getGatewayAddress()).raiseAlarm();
-        } catch (RemoteException | NotBoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Checks whether a Presence Sensor located on another server is activated or not.
-     *
-     * @return {@code true} if the remote Presence Sensor is activated;
-     * {@code false} otherwise
-     */
-    private boolean isRemotePresenceSensorActivated() {
-        final boolean[] authorizedUser = new boolean[1];
-
-        getRegisteredIoTs().keySet().stream()
-                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
-                .map(ioT -> ((Sensor) ioT))
-                .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
-                .map(sensor -> getRegisteredIoTs().get(sensor))
-                .forEach((Address address) -> {
-                    try {
-                        authorizedUser[0] = SensorServer.connect(address).isPresenceSensorActivated();
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-        return authorizedUser[0];
     }
 
     private SensorConfig getSensorConfig() {

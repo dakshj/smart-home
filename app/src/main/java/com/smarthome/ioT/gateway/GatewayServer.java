@@ -2,7 +2,6 @@ package com.smarthome.ioT.gateway;
 
 import com.smarthome.ioT.IoTServer;
 import com.smarthome.model.Address;
-import com.smarthome.model.Device;
 import com.smarthome.model.IoT;
 
 import java.rmi.NotBoundException;
@@ -43,13 +42,6 @@ public interface GatewayServer extends IoTServer {
             throws RemoteException;
 
     /**
-     * Queries the current state of the IoT.
-     *
-     * @param ioT The identifier of that ioT
-     */
-    void queryState(final IoT ioT) throws RemoteException;
-
-    /**
      * Reports the current state of the sensor.
      *
      * @param ioT               The IoT model object, containing the current state of the IoT
@@ -60,20 +52,13 @@ public interface GatewayServer extends IoTServer {
     void reportState(final IoT ioT, final long time, final long senderLogicalTime)
             throws RemoteException;
 
-    /**
-     * Sets the state of the device.
-     *
-     * @param device The Device whose state needs to be changed
-     * @param state  The new state of the device
-     */
-    void setDeviceState(final Device device, final boolean state) throws RemoteException;
-
     Map<IoT, Address> fetchRegisteredIoTs() throws RemoteException;
 
     /**
      * Raises an alarm to alert that an intruder has entered the house.
      *
+     * @param senderLogicalTime The logical time of the calling IoT server
      * @throws RemoteException Thrown when a Java RMI Exception occurs
      */
-    void raiseAlarm() throws RemoteException;
+    void raiseAlarm(final long senderLogicalTime) throws RemoteException;
 }

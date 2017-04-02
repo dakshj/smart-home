@@ -1,6 +1,7 @@
 package com.smarthome.ioT;
 
 import com.smarthome.enums.IoTType;
+import com.smarthome.enums.SensorType;
 import com.smarthome.ioT.db.DbServer;
 import com.smarthome.ioT.device.DeviceServer;
 import com.smarthome.ioT.gateway.GatewayServer;
@@ -8,6 +9,7 @@ import com.smarthome.ioT.sensor.SensorServer;
 import com.smarthome.model.Address;
 import com.smarthome.model.IoT;
 import com.smarthome.model.config.ServerConfig;
+import com.smarthome.model.sensor.Sensor;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -364,5 +366,42 @@ public abstract class IoTServerImpl implements IoTServer {
         }
 
         return 0;
+    }
+
+    /**
+     * Checks whether a Presence Sensor located on another server is activated or not.
+     *
+     * @return {@code true} if the remote Presence Sensor is activated;
+     * {@code false} otherwise
+     */
+    protected boolean isRemotePresenceSensorActivated() {
+        final boolean[] authorizedUser = new boolean[1];
+
+        getRegisteredIoTs().keySet().stream()
+                .filter(ioT -> ioT.getIoTType() == IoTType.SENSOR)
+                .map(ioT -> ((Sensor) ioT))
+                .filter(sensor -> sensor.getSensorType() == SensorType.PRESENCE)
+                .map(sensor -> getRegisteredIoTs().get(sensor))
+                .forEach((Address address) -> {
+                    try {
+                        authorizedUser[0] = SensorServer.connect(address)
+                                .isPresenceSensorActivated(getLogicalTime());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        return authorizedUser[0];
+    }
+
+    protected void raiseRemoteAlarm() {
+        System.out.println("Raising Alarm!");
+        System.out.println("Informing Gateway...");
+
+        try {
+            GatewayServer.connect(getServerConfig().getGatewayAddress()).raiseAlarm(getLogicalTime());
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+        }
     }
 }

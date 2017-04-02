@@ -20,7 +20,7 @@ public class DbServerImpl extends IoTServerImpl implements DbServer {
 
     public DbServerImpl(final ServerConfig serverConfig) throws RemoteException {
         super(serverConfig, true);
-        logger = new Logger();
+        logger = new Logger(getCurrentTime());
     }
 
     @Override
