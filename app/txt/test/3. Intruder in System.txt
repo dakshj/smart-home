@@ -6,18 +6,24 @@ Please input any character after all IoT servers are running.
 This will begin the Leader Election and Time Synchronization jobs.
 a
 
+~~~~~~Time Synchronization Started~~~~~~
+
 Electing a Leader for Time Synchronization...
 Broadcasting Map of Registered IoTs, to all IoTs...
-Received Time Synchronization offset of 2505 ms.
 Broadcast complete.
+Waiting for Leader's response...
+Received response from Leader.
+Received Time Synchronization offset of 2502 ms.
+
+~~~~~~Time Synchronization Complete~~~~~~
+
 State of DOOR : Open.
 State of DOOR : Closed.
 An intruder has entered the Smart Home!
 Switching off all outlets!
-State of OUTLET : Off.
 Switching on all bulbs!
-State of BULB : On.
 Contacting 911 and the Home Owner!
+State of BULB : On.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gateway END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -28,7 +34,7 @@ Server started.
 Registering to Gateway...
 Successfully registered.
 Received Map of Registered IoTs from Gateway.
-Received Time Synchronization offset of 7500 ms.
+Received Time Synchronization offset of 7498 ms.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DB END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -38,31 +44,35 @@ Received Time Synchronization offset of 7500 ms.
 Server started.
 Registering to Gateway...
 Successfully registered.
-New Temperature: 80.35°F.
-New Temperature: 69.47°F.
-New Temperature: 75.75°F.
-New Temperature: 67.32°F.
-New Temperature: 75.77°F.
-New Temperature: 71.6°F.
-Received Time Synchronization offset of -17501 ms.
+New Temperature: 82.93°F.
+New Temperature: 75.08°F.
+New Temperature: 69.67°F.
+New Temperature: 74.76°F.
+New Temperature: 79.55°F.
 Received Map of Registered IoTs from Gateway.
-New Temperature: 70.94°F.
-New Temperature: 79.59°F.
-New Temperature: 81.46°F.
-New Temperature: 82.7°F.
-New Temperature: 81.61°F.
-New Temperature: 67.2°F.
-New Temperature: 83.24°F.
-New Temperature: 76.02°F.
-New Temperature: 71.39°F.
-New Temperature: 82.5°F.
-New Temperature: 70.91°F.
-New Temperature: 83.11°F.
-New Temperature: 65.47°F.
-New Temperature: 71.62°F.
-New Temperature: 79.86°F.
-New Temperature: 76.48°F.
-New Temperature: 82.08°F.
+I am the Leader.
+Starting Time Synchronization...
+Time Synchronization Offset Map:
+	DB         24995
+	MOTION     9997
+	BULB       14997
+	GATEWAY    19999
+	DOOR       29997
+	TEMPERATURE 0
+	PRESENCE   34998
+	OUTLET     4999
+Received Time Synchronization offset of -17497 ms.
+New Temperature: 68.44°F.
+New Temperature: 74.65°F.
+New Temperature: 80.48°F.
+New Temperature: 80.33°F.
+New Temperature: 80.92°F.
+New Temperature: 81.22°F.
+New Temperature: 82.24°F.
+New Temperature: 67.63°F.
+New Temperature: 75.09°F.
+New Temperature: 84.72°F.
+New Temperature: 71.36°F.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Temperature Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -73,20 +83,7 @@ Server started.
 Registering to Gateway...
 Successfully registered.
 Received Map of Registered IoTs from Gateway.
-I am the Leader.
-Starting Time Synchronization...
-Time Synchronization Offset Map:
-	PRESENCE   24996     
-	MOTION     0         
-	OUTLET     -5009     
-	BULB       4993      
-	DB         14994     
-	TEMPERATURE -10007    
-	GATEWAY    9999      
-	DOOR       19992     
-Received Time Synchronization offset of -7494 ms.
-
-Time Synchronization complete.
+Received Time Synchronization offset of -7500 ms.
 Detected motion.
 Raising Alarm!
 Informing Gateway...
@@ -99,9 +96,8 @@ Informing Gateway...
 Detected motion.
 Raising Alarm!
 Informing Gateway...
-Detected motion.
-Raising Alarm!
-Informing Gateway...
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -7500 ms.
 Detected motion.
 Raising Alarm!
 Informing Gateway...
@@ -119,10 +115,12 @@ Informing Gateway...
 Server started.
 Registering to Gateway...
 Successfully registered.
-Received Time Synchronization offset of 12498 ms.
 Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 12500 ms.
 Door opened.
 Door closed.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 12500 ms.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Door Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -133,7 +131,9 @@ Server started.
 Registering to Gateway...
 Successfully registered.
 Received Map of Registered IoTs from Gateway.
-Received Time Synchronization offset of 17502 ms.
+Received Time Synchronization offset of 17501 ms.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of 17500 ms.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Presence Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -143,9 +143,11 @@ Received Time Synchronization offset of 17502 ms.
 Server started.
 Registering to Gateway...
 Successfully registered.
-Received Time Synchronization offset of -2501 ms.
 Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -2500 ms.
 BULB switched on.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -2500 ms.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bulb END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -155,9 +157,10 @@ BULB switched on.
 Server started.
 Registering to Gateway...
 Successfully registered.
-Received Time Synchronization offset of -12503 ms.
 Received Map of Registered IoTs from Gateway.
-OUTLET switched off.
+Received Time Synchronization offset of -12498 ms.
+Received Map of Registered IoTs from Gateway.
+Received Time Synchronization offset of -12500 ms.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Outlet END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -169,23 +172,18 @@ Opening the door.
 Closing the door.
 Moving around the Smart Home.
 Randomly switching devices on and off, and randomly moving around.
-Cannot toggle the BULB because the Entrant is an Intruder!
+Cannot toggle the OUTLET because the Entrant is an Intruder!
+Cannot toggle the OUTLET because the Entrant is an Intruder!
 Moving around the Smart Home.
 Cannot toggle the OUTLET because the Entrant is an Intruder!
 Moving around the Smart Home.
 Cannot toggle the BULB because the Entrant is an Intruder!
 Cannot toggle the OUTLET because the Entrant is an Intruder!
-Cannot toggle the BULB because the Entrant is an Intruder!
-Cannot toggle the OUTLET because the Entrant is an Intruder!
-Cannot toggle the BULB because the Entrant is an Intruder!
 Moving around the Smart Home.
 Cannot toggle the BULB because the Entrant is an Intruder!
 Cannot toggle the OUTLET because the Entrant is an Intruder!
-Cannot toggle the BULB because the Entrant is an Intruder!
 Moving around the Smart Home.
 Cannot toggle the BULB because the Entrant is an Intruder!
-Moving around the Smart Home.
-Cannot toggle the OUTLET because the Entrant is an Intruder!
 Moving around the Smart Home.
 Moving towards the door to leave the Smart Home.
 Cannot use the door because the Entrant is an Intruder!
@@ -195,18 +193,16 @@ Cannot use the door because the Entrant is an Intruder!
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Log File START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-0,4e2c7db6-1ad8-4c95-ac15-62e4fdd14368,0,2,null,1491110824654,11,Door opened.
-0,4e2c7db6-1ad8-4c95-ac15-62e4fdd14368,0,2,null,1491110824675,13,Door closed.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110824711,10,Motion detected.
-1,null,null,null,null,1491110824726,15,Intruder entered the Smart Home.
-0,d34154d7-ef52-47be-85a4-dcbf844a41f8,1,null,1,1491110824742,19,OUTLET switched off.
-0,9d9cfd4e-0439-4aa2-b4aa-3941369b06cf,1,null,0,1491110824757,23,BULB switched on.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110827021,11,Motion detected.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110829674,12,Motion detected.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110841299,13,Motion detected.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110848310,14,Motion detected.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110852822,15,Motion detected.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110856563,16,Motion detected.
-0,505c85a1-deb0-4a91-a2db-ccdc1167bcef,0,1,null,1491110857393,17,Motion detected.
+0,8941309d-4ce8-4b37-a02d-b72d4d07552c,0,2,null,1491171871997,12,Door opened.
+0,8941309d-4ce8-4b37-a02d-b72d4d07552c,0,2,null,1491171872559,13,Door closed.
+0,5010dbec-e996-4eda-becf-fe2f664b3b69,0,1,null,1491171873361,12,Motion detected.
+1,null,null,null,null,1491171873376,15,Intruder entered the Smart Home.
+0,58351534-7481-485f-86dd-ab135e0ee57b,1,null,0,1491171873399,19,BULB switched on.
+0,5010dbec-e996-4eda-becf-fe2f664b3b69,0,1,null,1491171880701,13,Motion detected.
+0,5010dbec-e996-4eda-becf-fe2f664b3b69,0,1,null,1491171884354,14,Motion detected.
+0,5010dbec-e996-4eda-becf-fe2f664b3b69,0,1,null,1491171888434,15,Motion detected.
+0,5010dbec-e996-4eda-becf-fe2f664b3b69,0,1,null,1491171897028,31,Motion detected.
+0,5010dbec-e996-4eda-becf-fe2f664b3b69,0,1,null,1491171899711,32,Motion detected.
+0,5010dbec-e996-4eda-becf-fe2f664b3b69,0,1,null,1491171901209,33,Motion detected.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Log File END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

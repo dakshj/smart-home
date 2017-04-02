@@ -1,0 +1,135 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gateway START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+
+Please input any character after all IoT servers are running.
+This will begin the Leader Election and Time Synchronization jobs.
+a
+
+~~~~~~Time Synchronization Started~~~~~~
+
+Electing a Leader for Time Synchronization...
+I am the Leader.
+Starting Time Synchronization...
+Time Synchronization Offset Map:
+	BULB       -5007
+	GATEWAY    0
+	DB         4988
+	PRESENCE   14990
+	TEMPERATURE -20006
+	OUTLET     -15006
+	MOTION     -10006
+	DOOR       9994
+Received Time Synchronization offset of 2506 ms.
+
+~~~~~~Time Synchronization Complete~~~~~~
+
+
+~~~~~~Time Synchronization Started~~~~~~
+
+Electing a Leader for Time Synchronization...
+I am the Leader.
+Starting Time Synchronization...
+Time Synchronization Offset Map:
+	BULB       -5001
+	GATEWAY    0
+	DB         4998
+	PRESENCE   14995
+	TEMPERATURE -20008
+	OUTLET     -15002
+	MOTION     -10005
+	DOOR       9999
+Received Time Synchronization offset of 2503 ms.
+
+~~~~~~Time Synchronization Complete~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gateway END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DB START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Time Synchronization offset of 7494 ms.
+Received Time Synchronization offset of 7501 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DB END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Temperature Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+New Temperature: 78.72°F.
+Received Time Synchronization offset of -17500 ms.
+New Temperature: 73.72°F.
+New Temperature: 82.28°F.
+New Temperature: 74.31°F.
+New Temperature: 82.09°F.
+New Temperature: 82.1°F.
+New Temperature: 74.57°F.
+New Temperature: 73.15°F.
+New Temperature: 70.05°F.
+New Temperature: 80.36°F.
+Received Time Synchronization offset of -17505 ms.
+New Temperature: 81.63°F.
+New Temperature: 76.32°F.
+New Temperature: 75.94°F.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Temperature Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Motion Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Time Synchronization offset of -7500 ms.
+Received Time Synchronization offset of -7502 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Motion Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Door Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Time Synchronization offset of 12500 ms.
+Received Time Synchronization offset of 12502 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Door Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Presence Sensor START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Time Synchronization offset of 17496 ms.
+Received Time Synchronization offset of 17498 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Presence Sensor END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bulb START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Time Synchronization offset of -2501 ms.
+Received Time Synchronization offset of -2498 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bulb END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Outlet START~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Server started.
+Registering to Gateway...
+Successfully registered.
+Received Time Synchronization offset of -12500 ms.
+Received Time Synchronization offset of -12499 ms.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Outlet END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

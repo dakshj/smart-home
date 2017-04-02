@@ -279,7 +279,6 @@ public class GatewayServerImpl extends IoTServerImpl implements GatewayServer {
 
         if (!atHome) {
             switchOffAllOutlets();
-
             resetAllPresenceSensorsToInactive();
         }
     }

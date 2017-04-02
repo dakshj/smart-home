@@ -75,8 +75,12 @@ public class Entrant {
         System.out.println("Opening the door.");
         setDoorSensors(true);
 
+        addRandomDelay();
+
         System.out.println("Closing the door.");
         setDoorSensors(false);
+
+        addRandomDelay();
 
         System.out.println("Moving around the Smart Home.");
         triggerMotionSensors();
@@ -87,9 +91,13 @@ public class Entrant {
         System.out.println("Moving towards the door to leave the Smart Home.");
         triggerMotionSensors();
 
+        addRandomDelay();
+
         if (getEntrantConfig().isAuthorized()) {
             System.out.println("Opening the door.");
             setDoorSensors(true);
+
+            addRandomDelay();
 
             System.out.println("Closing the door.");
             setDoorSensors(false);
