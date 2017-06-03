@@ -82,3 +82,19 @@ Collaborators: [Daksh Jotwani](https://github.com/dakshj), [Nidhi Mundra](https:
 * `LimitedSizeArrayList<Log> getYoungestLogsList()`
 * `void intruderEntered(final long chronologicalTime, final long logicalTime)`
 * `void userEntered(final boolean atHome, final long synchronizedTime, final long logicalTime)`
+
+## License
+
+    Copyright 2017 Daksh Jotwani, Nidhi Mundra
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
